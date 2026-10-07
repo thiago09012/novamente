@@ -35,7 +35,7 @@ function escapeMarkdownLine(line: string): string {
 
 export function exportMarkdown(notes: readonly Note[]): string {
   const children = aliveTree(notes);
-  const lines = ['<!-- MENTE Markdown exchange v1 -->'];
+  const lines = ['<!-- Neuronow Markdown exchange v1 -->'];
   const write = (siblings: Note[], depth: number) => {
     for (const note of siblings) {
       const headingLevel = Math.min(depth + 1, 6);
@@ -76,7 +76,7 @@ export function exportOpml(notes: readonly Note[]): string {
           : `<outline ${attributes} />`;
       })
       .join('');
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<opml version="2.0" xmlns:mente="urn:mente:exchange:v1"><head><title>MENTE</title></head><body>${write(children.get(null) ?? [])}</body></opml>\n`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<opml version="2.0" xmlns:mente="urn:mente:exchange:v1"><head><title>Neuronow</title></head><body>${write(children.get(null) ?? [])}</body></opml>\n`;
 }
 
 function parseMarkdown(text: string): OutlineEntry[] {
@@ -101,7 +101,7 @@ function parseMarkdown(text: string): OutlineEntry[] {
       }
       continue;
     }
-    if (/^\s*<!-- MENTE Markdown exchange/u.test(rawLine)) continue;
+    if (/^\s*<!-- (?:MENTE|Neuronow) Markdown exchange/u.test(rawLine)) continue;
 
     const heading = rawLine.match(/^\s*(#{1,6})\s+(.+?)\s*#*\s*$/u);
     if (heading) {

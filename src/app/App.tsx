@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { openAppDatabase, StorageUnavailableError } from '@/db/bootstrap';
 import { openMemoryDatabase } from '@/db/memory';
+import { restoreMarkdownVaultWriteThrough } from '@/db/obsidianVault';
 import { subscribeDatabaseChanges } from '@/db/sync';
 import { t } from '@/i18n';
 import { setRuntime } from '@/app/runtime';
@@ -63,6 +64,7 @@ export function App() {
     try {
       const database = await openAppDatabase();
       setRuntime(database);
+      await restoreMarkdownVaultWriteThrough(database);
       useUiStore.getState().setMemoryOnly(false);
       await Promise.all([useSettingsStore.getState().load(), useNotesStore.getState().load()]);
       setMemoryOnly(false);
@@ -125,12 +127,9 @@ export function App() {
       const remoteSelected = selectedId
         ? change.upsert.find((note) => note.id === selectedId)
         : undefined;
-      useNotesStore.getState().applyRemoteChanges(
-        change.upsert,
-        change.remove,
-        change.replaceLinkOwners,
-        change.links,
-      );
+      useNotesStore
+        .getState()
+        .applyRemoteChanges(change.upsert, change.remove, change.replaceLinkOwners, change.links);
 
       if (!remoteSelected || !localSelected || remoteSelected.updatedAt < localSelected.updatedAt) {
         return;
@@ -138,7 +137,10 @@ export function App() {
       if (remoteSelected.deletedAt !== null) {
         const deletedRootId = remoteSelected.deletedRootId ?? remoteSelected.id;
         if (settings.lastCategoryId) useViewStore.getState().select(settings.lastCategoryId, null);
-        void useSettingsStore.getState().update({ editorOpen: false }).catch(() => undefined);
+        void useSettingsStore
+          .getState()
+          .update({ editorOpen: false })
+          .catch(() => undefined);
         useUiStore.getState().toast(t('toast.notaExcluidaOutraAba'), {
           actionLabel: t('common.desfazer'),
           onAction: () => {

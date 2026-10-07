@@ -9,9 +9,17 @@ stress-seed.json
 .vite
 *.tsbuildinfo
 mente-vault/
+neuronow-vault/
 /backup.json
 merged.json
+neuronow-backup*.json
+neuronow-merged*.json
+neuronow-context-*.md
 mente-backup-*.json
 .env*
 !.env.example
 .vercel
+.agents/
+**/.mente/base.json
+**/.mente/scope.json
+**/merged.json

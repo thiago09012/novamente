@@ -1,6 +1,7 @@
 import { SETTINGS_KEY, defaultSettings, sanitizeSettings } from '@/domain/settings';
 import { publishDatabaseChange } from '@/db/sync';
 import { isQuotaExceededError } from '@/db/storageErrors';
+import { writeMarkdownBeforeDatabase } from '@/db/markdownVaultWriteGate';
 import { switchToMemoryOnly } from '@/app/runtime';
 
 import type { MenteDatabase } from '../database';
@@ -30,6 +31,7 @@ function createNotesRepository(db: MenteDatabase): NotesRepository {
     getAll: () => db.notes.toArray(),
     getById: (id) => db.notes.get(id),
     async put(note) {
+      await writeMarkdownBeforeDatabase([note]);
       await withQuotaFallback(
         async () => { await db.notes.put(note); },
         (memory) => memory.repos.notes.put(note),
@@ -37,6 +39,7 @@ function createNotesRepository(db: MenteDatabase): NotesRepository {
       publishDatabaseChange({ kind: 'notes', upsert: [note], remove: [] });
     },
     async putMany(notes) {
+      await writeMarkdownBeforeDatabase(notes);
       await withQuotaFallback(
         async () => { await db.notes.bulkPut([...notes]); },
         (memory) => memory.repos.notes.putMany(notes),
@@ -44,6 +47,7 @@ function createNotesRepository(db: MenteDatabase): NotesRepository {
       if (notes.length > 0) publishDatabaseChange({ kind: 'notes', upsert: [...notes], remove: [] });
     },
     async applyChanges(upsert, remove, replaceLinkOwners = [], links = []) {
+      await writeMarkdownBeforeDatabase(upsert, remove);
       await withQuotaFallback(
         () =>
           db.transaction('rw', db.notes, db.links, async () => {
@@ -65,6 +69,7 @@ function createNotesRepository(db: MenteDatabase): NotesRepository {
       }
     },
     async saveContent(note, links) {
+      await writeMarkdownBeforeDatabase([note]);
       await withQuotaFallback(
         () =>
           db.transaction('rw', db.notes, db.links, async () => {
@@ -83,6 +88,7 @@ function createNotesRepository(db: MenteDatabase): NotesRepository {
       });
     },
     async remove(ids) {
+      await writeMarkdownBeforeDatabase([], ids);
       await withQuotaFallback(
         () => db.notes.bulkDelete([...ids]),
         (memory) => memory.repos.notes.remove(ids),

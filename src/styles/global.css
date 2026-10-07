@@ -89,3 +89,87 @@ select {
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
 }
+
+/*
+ * Tipografia do conteúdo das notas (.tiptap-content envolve o EditorContent).
+ * O preflight do Tailwind zera títulos e listas; sem estas regras os `#`
+ * viram texto corrido e os itens perdem os marcadores. Cores herdadas dos
+ * tokens de texto existentes — sem impacto no teste de contraste.
+ */
+.tiptap-content h1,
+.tiptap-content h2,
+.tiptap-content h3 {
+  color: var(--text);
+  font-weight: 700;
+  line-height: var(--line-tight);
+  margin: 1em 0 0.5em;
+  text-wrap: pretty;
+}
+
+.tiptap-content h1 {
+  font-size: var(--text-xl);
+}
+
+.tiptap-content h2 {
+  font-size: var(--text-lg);
+}
+
+.tiptap-content h3 {
+  font-size: var(--text-base);
+}
+
+.tiptap-content h1:first-child,
+.tiptap-content h2:first-child,
+.tiptap-content h3:first-child {
+  margin-top: 0;
+}
+
+.tiptap-content ul,
+.tiptap-content ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.tiptap-content ul {
+  list-style-type: disc;
+}
+
+.tiptap-content ol {
+  list-style-type: decimal;
+}
+
+.tiptap-content li {
+  margin: 0.25em 0;
+}
+
+.tiptap-content li > p {
+  margin: 0;
+}
+
+.tiptap-content blockquote {
+  border-left: 2px solid var(--border-strong);
+  margin: 0.75em 0;
+  padding-left: 1em;
+}
+
+.tiptap-content code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+
+.tiptap-content pre {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin: 0.75em 0;
+  overflow-x: auto;
+  padding: 0.75em 1em;
+}
+
+.tiptap-content pre code {
+  font-size: var(--text-sm);
+}
+
+.tiptap-content hr {
+  border-color: var(--border);
+  margin: 1em 0;
+}

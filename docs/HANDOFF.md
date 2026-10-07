@@ -1,4 +1,4 @@
-# HANDOFF — MENTE
+# HANDOFF — Neuronow
 
 _Atualizado em 06/10/2026._ O plano vivo está em `docs/PLAN.md`; requisitos completos em `prompt-mestre-mente.md`.
 

@@ -1,6 +1,6 @@
-# MENTE
+# Neuronow
 
-**Segundo cérebro local-first.** O MENTE organiza suas notas em uma
+**Notas de projetos local-first, prontas para trabalhar com IA.** O Neuronow organiza suas notas em uma
 árvore navegável (categorias → notas → subnotas), com editor rico, wikilinks
 `[[...]]`, busca instantânea e canvas visual. Funciona no navegador sem conta
 ou conexão; você pode ativar uma conta Supabase opcional para guardar cópias.
@@ -9,8 +9,8 @@ ou conexão; você pode ativar uma conta Supabase opcional para guardar cópias.
   se o armazenamento falhar). Opcionalmente, entre com uma conta Supabase e
   envie/restaure uma cópia privada pela seção de configurações.
 - **Interface em português (pt-BR)**, tema escuro por padrão.
-- **Feito para humanos e para IAs**: um vault Markdown versionável permite que
-  uma IA edite suas notas com segurança (ver [MENTE para IAs](#mente-para-ias)).
+- **Feito para humanos e para IAs**: exporte contexto de um projeto, busque
+  notas conectadas e revise as mudanças sugeridas pela IA (ver [Neuronow para IAs](#neuronow-para-ias)).
 
 ## Recursos
 
@@ -27,6 +27,8 @@ ou conexão; você pode ativar uma conta Supabase opcional para guardar cópias.
 - **Undo/redo estrutural** (limite 200), com desfazer agrupado em mutações em
   lote.
 - **Lixeira** com retenção de 30 dias, restauração e exclusão definitiva.
+- **Contexto para IA**: exporte a categoria ativa e suas notas-filhas em
+  Markdown com IDs, caminhos, tags e links, sem alterar a base local.
 - **Backup**: exportar/importar **JSON** (full-fidelity), **Markdown** e
   **OPML**, com validação e confirmação antes de substituir os dados.
 - **Resiliência**: modo memória automático se a cota do navegador estourar,
@@ -64,44 +66,76 @@ npm run dev                      # http://localhost:5173
 | `npm run e2e`           | Testes Playwright (`e2e/`, Chromium, pt-BR)                   |
 | `npm run perf:stress`   | E2e de estresse (5.000 notas, build + preview)                |
 | `npm run seed:stress`   | Gera seed JSON de N notas (não grava no banco)                |
-| `npm run mente`         | CLI de vault/segundo cérebro (`npm run mente -- help`)        |
+| `npm run neuronow`      | CLI de contexto e vault para IA (`npm run neuronow -- help`)  |
+| `npm run mente`         | Alias compatível da CLI antiga                                |
 
-## MENTE para IAs
+## Neuronow para IAs
 
-O MENTE expõe um **vault Markdown**: um backup vira uma pasta de arquivos `.md`
+O Neuronow expõe um **vault Markdown**: um backup vira uma pasta de arquivos `.md`
 que uma IA pode ler e editar com qualquer ferramenta (agentes de código,
 editores, scripts). As mudanças voltam para o app via **merge inteligente**.
 
-### Fluxo completo
+### Fluxo Obsidian recomendado
+
+1. Em Configurações → Dados, conecte uma pasta dedicada dentro do vault do
+   Obsidian e sincronize no começo da sessão.
+2. Edite os `.md` dessa pasta com o Obsidian ou com a IA. As notas usam
+   frontmatter com IDs estáveis e `[[wikilinks]]`. Depois da sincronização, as
+   alterações feitas no app são gravadas primeiro nos arquivos Markdown.
+3. Após a IA editar os arquivos, sincronize novamente no app. Ele importa as
+   mudanças, grava a versão consolidada e cria `.mente/review.md`; versões
+   divergentes ficam preservadas em `.mente/conflicts/`.
+4. Mantenha uma nota filha `Resumo do projeto` para objetivo, estado, decisões,
+   pendências, riscos e próximo passo.
+
+### Fluxo CLI alternativo (backup JSON)
 
 ```bash
 # 1) No app: Configurações → Dados → exporte o backup JSON
 
-# 2) Preparar workspace local acessível à IA
-npm run mente -- ai:prepare --input backup.json --out ./mente-vault
+# 2) Prepare somente o projeto que a IA vai trabalhar
+npm run neuronow -- ai:prepare --input backup.json --out ./neuronow-vault --root "Projeto X"
 
-# 3) Ler/editar (a IA pode editar os .md direto, ou usar o CLI):
-npm run mente -- tree   --vault ./mente-vault
-npm run mente -- search "assunto" --vault ./mente-vault
-npm run mente -- read   --path caminho/nota.md --vault ./mente-vault
-npm run mente -- create --parent "Categoria" --title "Nova nota" \
-              --tags ia,revisao --body "conteúdo" --vault ./mente-vault
+# 3) Busque fatos relevantes com orçamento aproximado de tokens
+npm run neuronow -- ai:context "prazo e próximos passos" --vault ./neuronow-vault --budget 1800
 
-# 4) Empacotar mudanças para revisão e importação
-npm run mente -- ai:package --vault ./mente-vault --out merged.json
+# 4) A IA pode ler/editar .md ou usar os comandos de vault
+npm run neuronow -- tree --vault ./neuronow-vault
+npm run neuronow -- read --path caminho/nota.md --vault ./neuronow-vault
+npm run neuronow -- create --parent "Projeto X" --title "Nova nota" \
+                  --tags ia,revisao --body "conteúdo" --vault ./neuronow-vault
 
-# 5) No app: Configurações → Dados → Importar arquivo → merged.json
+# 5) Exporte um backup atualizado e empacote com revisão de escopo
+npm run neuronow -- ai:package --vault ./neuronow-vault --base backup-atual.json \
+                  --root "Projeto X" --out neuronow-merged.json
+
+# 6) Revise .mente/review.md e importe o JSON no app
 ```
 
-O workspace inclui `.mente/AGENTES.md`, `.mente/manifest.json` e a base
-`.mente/base.json`, usada para preservar configurações e visualizações. A pasta
-`mente-vault/` é ignorada pelo Git para evitar publicar notas pessoais.
+O app também oferece **Exportar contexto do projeto ativo para IA** em
+Configurações → Dados. Esse Markdown inclui apenas a categoria ativa e suas
+descendentes, com IDs e caminhos para a IA citar suas fontes.
 
-**Limite de acesso:** o app mantém os dados no IndexedDB do navegador. O agente
-consegue operar a pasta do vault, mas não lê diretamente o perfil do browser.
-A exportação inicial e cada importação continuam sendo feitas no app. Exporte
-um backup novo e rode `ai:prepare` para atualizar o vault após mudanças feitas
-no app.
+O vault limitado inclui `.mente/AGENTES.md`, `.mente/manifest.json` e um
+`.mente/base.json` contendo somente o projeto selecionado. Ao empacotar, passe
+um backup completo atualizado em `--base`; o CLI preserva as demais notas e
+rejeita mudanças que saiam do projeto. O relatório fica em `.mente/review.md`.
+As pastas `mente-vault/` e `neuronow-vault/` são ignoradas pelo Git para evitar
+publicar anotações pessoais.
+
+O IndexedDB continua sendo o cache local usado pela interface; após sincronizar,
+as gravações do app passam primeiro pelos arquivos Markdown. Sincronize após
+edições externas da IA/Obsidian e no início de cada sessão. O navegador pode
+pedir autorização da pasta novamente. Apagar um arquivo `.md` não exclui uma
+nota; exclusões são feitas no app para evitar remoção acidental de dados.
+
+**Memória de projeto para cada sessão:** mantenha uma nota filha chamada
+`Resumo do projeto` dentro da categoria. Escreva nela objetivo, estado atual,
+decisões, pendências, riscos e próximo passo. `ai:context` inclui essa nota
+primeiro e reduz os trechos seguintes para caber no `--budget` aproximado
+(estimativa de caracteres, não um tokenizer exato). Se o resumo não existir,
+usa a nota da categoria como âncora. Em backups com mais de um projeto, passe
+`--root` para evitar buscar no projeto errado.
 
 ### Regras do merge
 
@@ -109,9 +143,10 @@ no app.
   (apagar um arquivo **não** apaga a nota — exclusão é feita no app).
 - **LWW por nota**: em conflito, vence quem tiver `updatedAt` maior ou igual.
   Reexporte o vault antes de editar para garantir que sua edição vença.
-- **Herança com `--base`**: se o frontmatter for reescrito de forma mínima
+- **Herança com `.mente/base.json`**: se o frontmatter for reescrito de forma mínima
   (só `id`), os campos ausentes (`tags`, `icon`, `color`, `orderKey`, datas)
-  são herdados do backup original. Use `--base` em todos os comandos.
+  são herdados do snapshot usado para preparar o vault. No `ai:package`, `--base`
+  pode apontar para o backup completo mais recente para detectar conflitos.
 - **Reparo automático**: órfãos, ciclos e conteúdo inválido são normalizados
   no import; o app também repara na abertura.
 - **Formato full-fidelity** continua sendo o **JSON** (`mente-backup` v1); o
@@ -143,10 +178,10 @@ quando `parentId` está ausente.
 ### Documentação do CLI
 
 ```bash
-npm run mente -- help
+npm run neuronow -- help
 ```
 
-Comandos: `ai:prepare`, `ai:package`, `vault:export`, `vault:import`, `search`, `read`, `tree`, `create`,
+Comandos: `ai:prepare`, `ai:context`, `ai:package`, `vault:export`, `vault:import`, `search`, `read`, `tree`, `create`,
 `move`, `tag`, `manifest`, `help`. Implementação: `scripts/mente.ts` (usa apenas
 `src/domain/`), codec em `src/domain/markdown.ts`, grafo do vault em
 `src/domain/vault.ts`.
@@ -216,11 +251,12 @@ Tabela completa: [`docs/SHORTCUTS.md`](docs/SHORTCUTS.md).
 | Arquivo                                            | Conteúdo                               |
 | -------------------------------------------------- | -------------------------------------- |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)     | Arquitetura e modelo de dados          |
+| [`docs/AI_PLAYBOOK.md`](docs/AI_PLAYBOOK.md)       | Handoff detalhado para agentes e MCP   |
 | [`docs/SHORTCUTS.md`](docs/SHORTCUTS.md)           | Todos os atalhos de teclado            |
 | [`docs/HANDOFF.md`](docs/HANDOFF.md)               | Handoff técnico (ambiente, convenções) |
 | [`docs/PLAN.md`](docs/PLAN.md)                     | Plano de fases e status                |
 | [`docs/DECISIONS.md`](docs/DECISIONS.md)           | Registro de decisões técnicas          |
-| [`prompt-mestre-mente.md`](prompt-mestre-mente.md) | Especificação-mestre do produto        |
+| [`prompt-mestre-mente.md`](prompt-mestre-mente.md) | Especificação original do produto      |
 | [`AGENTS.md`](AGENTS.md)                           | Guia operacional para IAs              |
 
 ## Status

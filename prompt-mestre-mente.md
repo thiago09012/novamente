@@ -1,4 +1,4 @@
-# PROMPT MESTRE: construir o "NOVAMENTE" (app de notas em árvore)
+# PROMPT MESTRE: construir o Neuronow (app de notas em árvore)
 
 > Como usar: cole este documento inteiro na sua IA de código (Claude Code, Cursor, etc.) e anexe o arquivo `Testenote.html` como referência visual. Peça para ela trabalhar **fase por fase** (seção 15) e só avançar quando os critérios de aceite da fase anterior passarem.
 
@@ -22,7 +22,7 @@ Regras de conduta:
 
 ## 1. VISÃO DO PRODUTO
 
-**MENTE** é um app de notas onde **a hierarquia de notas é a própria navegação visual**. O usuário organiza o conhecimento como uma árvore horizontal (mapa mental) que nasce da barra lateral. Cada nó da árvore **é uma nota**, não um rótulo solto.
+**Neuronow** é um app de notas onde **a hierarquia de notas é a própria navegação visual**. O usuário organiza o conhecimento como uma árvore horizontal (mapa mental) que nasce da barra lateral. Cada nó da árvore **é uma nota**, não um rótulo solto.
 
 Ideia central (preservar):
 
@@ -189,7 +189,7 @@ Definir como CSS variables, com tema escuro (padrão) e claro:
 
 ### 5.2 Sidebar
 
-**Cabeçalho (56 px)**: nome "MENTE" (10 px, caixa alta, espaçamento de letras) + botão hambúrguer (recolher). Recolhida: só o botão, centralizado.
+**Cabeçalho (56 px)**: nome "Neuronow" + botão hambúrguer (recolher). Recolhida: só o botão, centralizado.
 
 **Campo de busca rápida** abaixo do cabeçalho (abre a paleta Ctrl+K; recolhida vira ícone de lupa).
 

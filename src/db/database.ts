@@ -12,12 +12,18 @@ export interface SettingsRow extends Settings {
   key: string;
 }
 
+export interface MarkdownVaultHandleRow {
+  id: 'obsidian';
+  handle: FileSystemDirectoryHandle;
+}
+
 export class MenteDatabase extends Dexie {
   notes!: Table<Note, ID>;
   links!: Table<Link, ID>;
   settings!: Table<SettingsRow, string>;
   views!: Table<ViewRecord, ID>;
   meta!: Table<MetaRow, string>;
+  vaultHandles!: Table<MarkdownVaultHandleRow, string>;
 
   constructor(name = 'mente') {
     super(name);
@@ -27,6 +33,14 @@ export class MenteDatabase extends Dexie {
       settings: 'key',
       views: 'rootId',
       meta: 'key',
+    });
+    this.version(2).stores({
+      notes: 'id, parentId, [parentId+orderKey], deletedAt, updatedAt, *tags',
+      links: 'id, fromId, toId',
+      settings: 'key',
+      views: 'rootId',
+      meta: 'key',
+      vaultHandles: 'id',
     });
   }
 }

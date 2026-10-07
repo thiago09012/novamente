@@ -1,12 +1,11 @@
-# Publicação: GitHub, Vercel e Supabase
+# Publicação do Neuronow: GitHub, Vercel e Supabase
 
 ## Estado
 
 - **Vercel** serve a aplicação Vite como SPA; `vercel.json` direciona rotas ao
   `index.html`.
-- **GitHub** deve guardar o código-fonte. O repositório ainda precisa ser
-  criado e conectado à conta.
-- **Supabase** oferece login e uma cópia JSON privada por usuário. O MENTE
+- **GitHub** guarda o código-fonte no repositório `thiago09012/novamente`.
+- **Supabase** oferece login e uma cópia JSON privada por usuário. O Neuronow
   continua salvando primeiro no IndexedDB. Envio e restauração são manuais;
   ainda não há sincronização em tempo real entre dispositivos.
 - Não coloque `service_role` em variáveis `VITE_*`, no navegador ou no Git.

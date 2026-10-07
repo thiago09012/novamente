@@ -66,6 +66,7 @@ Registro no formato: **decisão → motivo → consequência**. Atualizado a cad
 1. **Expurgo por retenção é parte do bootstrap e transaciona notas, links e views** → nenhum grupo vencido fica parcialmente removido após a inicialização.
 2. **Prazo mostrado em dias inteiros arredondados para cima** → o usuário sabe quando a exclusão definitiva ocorrerá sem precisar calcular horário exato.
 3. **Arestas de wikilinks desenhadas em camada SVG separada e controladas por preferência persistente** → o estado da árvore continua legível e o usuário pode desligar as conexões sem alterar os dados dos links.
+4. **Arestas de wikilinks ligadas por padrão em instalações novas (`showLinkEdges: true`)** → feedback do usuário: a interligação é o propósito do programa e vinha invisível; a preferência continua persistente e desligável, e migrações preservam o valor já salvo (usuários atuais ativam em Configurações).
 
 ## 9. Fase 7 — mobile
 

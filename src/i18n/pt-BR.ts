@@ -4,8 +4,8 @@
  */
 export const ptBR = {
   app: {
-    name: 'MENTE',
-    tagline: 'Suas notas em forma de árvore',
+    name: 'Neuronow',
+    tagline: 'Projetos e ideias conectados, prontos para a IA',
     carregando: 'Carregando…',
   },
   search: {
@@ -276,6 +276,25 @@ export const ptBR = {
     dados: 'Dados',
     backupAjuda:
       'JSON preserva todos os dados. Markdown e OPML preservam hierarquia, títulos, texto e tags.',
+    aiContextAjuda:
+      'Exporte somente a categoria ativa e suas notas-filhas em um pacote com IDs, caminhos e links para compartilhar com uma IA. O arquivo não altera suas notas; revise-o antes de enviar.',
+    aiContextExportar: 'Exportar contexto do projeto ativo para IA',
+    aiContextExportado: 'Contexto do projeto exportado em Markdown.',
+    aiContextErro: 'Não foi possível exportar o contexto do projeto.',
+    markdownVaultAjuda:
+      'Em navegador compatível e ambiente seguro, conecte uma pasta dedicada dentro do vault do Obsidian. Sincronize ao iniciar uma sessão da IA; depois, as edições feitas no app são gravadas primeiro no Markdown. Sincronize novamente após a IA editar os arquivos. Apague notas pelo app; arquivos removidos no Obsidian podem ser restaurados. O navegador pode pedir permissão novamente.',
+    markdownVaultConectar: 'Conectar pasta Markdown do Obsidian',
+    markdownVaultConectado: 'Pasta conectada: {name}',
+    markdownVaultSincronizar: 'Sincronizar pasta Markdown',
+    markdownVaultAlterar: 'Trocar pasta',
+    markdownVaultSincronizado:
+      'Sincronização concluída: {notes} notas no vault, {created} novas, {updated} atualizadas e {conflicts} conflitos. Confira .mente/review.md.',
+    markdownVaultErro:
+      'Não foi possível sincronizar a pasta Markdown. Verifique a permissão e os arquivos.',
+    markdownVaultNeedsSync:
+      'Há alterações externas na pasta Markdown. Sincronize o vault antes de editar no app.',
+    markdownVaultPermission:
+      'A permissão da pasta Markdown foi negada ou expirou. Abra Configurações → Dados e sincronize o vault antes de editar.',
     exportarJson: 'Exportar backup JSON',
     exportarMarkdown: 'Exportar Markdown',
     exportarOpml: 'Exportar OPML',
@@ -283,7 +302,7 @@ export const ptBR = {
     backupExportado: 'Backup exportado.',
     backupErroExportar: 'Não foi possível exportar o backup.',
     backupArquivoInvalido: 'O arquivo não é um backup JSON válido.',
-    backupImportado: 'Backup importado. Recarregando o MENTE…',
+    backupImportado: 'Backup importado. Recarregando o Neuronow…',
     backupErroImportar: 'Não foi possível importar o backup. Os dados atuais foram preservados.',
     confirmarImportacao: 'Confirmar importação do backup',
     backupResumo: '{notes} notas, {categories} categorias.',
@@ -292,7 +311,7 @@ export const ptBR = {
     cloudTitulo: 'Cópia na nuvem (Supabase)',
     cloudCarregando: 'Carregando opções da nuvem…',
     cloudNaoConfigurado:
-      'Configure VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY para ativar a conta e a cópia na nuvem. O MENTE continua funcionando localmente sem essas variáveis.',
+      'Configure VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY para ativar a conta e a cópia na nuvem. O Neuronow continua funcionando localmente sem essas variáveis.',
     cloudAjuda:
       'Sua base fica neste navegador até você enviar uma cópia. Restaurar substitui os dados locais. A cópia fica protegida por conta, mas não tem criptografia ponta a ponta: administradores do projeto Supabase podem acessar o conteúdo.',
     cloudEmail: 'E-mail',

@@ -6,7 +6,7 @@ export const SETTINGS_SCHEMA_VERSION = 1;
 export function defaultSettings(): Settings {
   return {
     theme: 'dark',
-    showLinkEdges: false,
+    showLinkEdges: true,
     sidebarCollapsed: false,
     editorWidth: 420,
     editorOpen: true,
