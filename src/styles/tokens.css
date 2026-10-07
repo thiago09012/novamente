@@ -1,0 +1,121 @@
+/*
+ * Tokens visuais do MENTE.
+ * Este arquivo é analisado por src/styles/contrast.test.ts — todo par de cores
+ * listado ali precisa manter WCAG AA (texto: 4.5:1, componentes: 3:1).
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* ---- superfícies ---- */
+  --bg-app: #0f0f0f;
+  --bg-sidebar: #0a0a0a;
+  --bg-editor: #121212;
+  --bg-node: #1a1a1a;
+  --bg-hover: #232323;
+  --bg-raised: #1f1f1f;
+
+  /* ---- linhas ---- */
+  --border: #2a2a2a;
+  --border-strong: #6e6e6e;
+
+  /* ---- texto ---- */
+  --text: #e8e8e8;
+  --text-muted: #a3a3a3;
+  --text-on-accent: #f2fdf5;
+  --text-on-accent-button: #052e16;
+
+  /* ---- acentos ---- */
+  --accent: #4ade80;
+  --accent-bg: #14532d;
+  --accent-soft: rgba(74, 222, 128, 0.12);
+  --danger: #f87171;
+  --danger-bg: #451a1a;
+  --warning: #fbbf24;
+  --link: #4ade80;
+  --focus: #4ade80;
+  --selection: rgba(74, 222, 128, 0.28);
+  --edge-link: #f59e0b;
+  --scrollbar: #3f3f3f;
+
+  /* ---- tipografia ---- */
+  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono', monospace;
+  --ui-scale: 1;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --line-tight: 1.25;
+  --line-normal: 1.55;
+
+  /* ---- espaço e raios ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-full: 999px;
+
+  /* ---- medidas ---- */
+  --touch: 44px;
+  --sidebar-w: 240px;
+  --sidebar-w-collapsed: 56px;
+  --editor-w: 420px;
+  --node-height: 44px;
+  --node-font-size: 14px;
+  --header-h: 56px;
+
+  /* ---- movimento ---- */
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 250ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.55);
+  --glow: 0 0 0 1px var(--accent), 0 0 14px rgba(74, 222, 128, 0.25);
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  --bg-app: #fafaf9;
+  --bg-sidebar: #f5f4f1;
+  --bg-editor: #ffffff;
+  --bg-node: #ffffff;
+  --bg-hover: #eeede9;
+  --bg-raised: #ffffff;
+
+  --border: #dedbd6;
+  --border-strong: #767676;
+
+  --text: #1c1b19;
+  --text-muted: #57544f;
+  --text-on-accent: #064e3b;
+  --text-on-accent-button: #ffffff;
+
+  --accent: #15803d;
+  --accent-bg: #dcfce7;
+  --accent-soft: rgba(21, 128, 61, 0.1);
+  --danger: #c11f1f;
+  --danger-bg: #fde8e8;
+  --warning: #9a4708;
+  --link: #15803d;
+  --focus: #15803d;
+  --selection: rgba(21, 128, 61, 0.22);
+  --edge-link: #9a4708;
+  --scrollbar: #c4c0b8;
+
+  --shadow-sm: 0 1px 2px rgba(28, 27, 25, 0.08);
+  --shadow: 0 4px 16px rgba(28, 27, 25, 0.12);
+  --shadow-lg: 0 12px 40px rgba(28, 27, 25, 0.18);
+  --glow: 0 0 0 1px var(--accent), 0 0 14px rgba(21, 128, 61, 0.2);
+}

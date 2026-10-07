@@ -1,0 +1,16 @@
+node_modules
+dist
+coverage
+*.local
+.DS_Store
+playwright-report
+test-results
+stress-seed.json
+.vite
+*.tsbuildinfo
+mente-vault/
+/backup.json
+merged.json
+mente-backup-*.json
+.env*
+!.env.example

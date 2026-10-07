@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f8f6" />
+    <title>MENTE · Protótipo mobile</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #202522;
+        background: #eef1ed;
+        font-synthesis: none;
+        --bg: #fbfcfa;
+        --panel: #fff;
+        --muted: #727a74;
+        --line: #e2e7e1;
+        --green: #138348;
+        --green-soft: #e1f5e9;
+        --green-line: #a7dfba;
+        --shadow: 0 24px 70px #26352b24, 0 3px 10px #26352b12;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; }
+      button { font: inherit; color: inherit; }
+      .page { max-width: 1120px; margin: 0 auto; padding: 42px 28px 56px; }
+      .eyebrow { margin: 0 0 10px; color: var(--green); font-size: 12px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+      h1 { margin: 0; font-size: clamp(26px, 4vw, 38px); letter-spacing: -.04em; }
+      .intro { max-width: 650px; margin: 12px 0 28px; color: #667069; font-size: 15px; line-height: 1.65; }
+      .demo { display: grid; grid-template-columns: minmax(250px, 340px) minmax(360px, 1fr); align-items: center; gap: clamp(32px, 7vw, 92px); }
+      .controls { padding: 22px; border: 1px solid #dfe5df; border-radius: 18px; background: #ffffffa8; box-shadow: 0 6px 28px #26352b0a; }
+      .controls h2 { margin: 0 0 8px; font-size: 17px; }
+      .controls p { margin: 0; color: #6b746d; font-size: 13px; line-height: 1.6; }
+      .switch { display: flex; gap: 5px; margin: 20px 0 15px; padding: 4px; border: 1px solid #e0e5e0; border-radius: 12px; background: #f1f4f0; }
+      .switch button { flex: 1; min-height: 42px; border: 0; border-radius: 9px; background: transparent; color: #69716b; font-size: 13px; font-weight: 650; cursor: pointer; }
+      .switch button[aria-pressed="true"] { background: white; color: #1f2922; box-shadow: 0 1px 5px #2437291b; }
+      .hint { display: flex; align-items: flex-start; gap: 10px; margin-top: 18px; padding-top: 17px; border-top: 1px solid #e4e9e3; color: #657068; font-size: 12px; line-height: 1.55; }
+      .hint b { color: #29352d; }
+      .hint-icon { display: grid; width: 25px; height: 25px; flex: 0 0 25px; place-items: center; border-radius: 8px; background: var(--green-soft); color: var(--green); font-size: 13px; }
+      .device-wrap { display: grid; justify-items: center; }
+      .device { position: relative; width: 390px; height: 844px; padding: 9px; border: 1px solid #c4cbc5; border-radius: 43px; background: #202521; box-shadow: var(--shadow); transition: width .32s ease, height .32s ease, border-radius .32s ease; }
+      .device.landscape { width: min(844px, 100%); height: 390px; border-radius: 34px; }
+      .screen { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 35px; background: var(--bg); }
+      .landscape .screen { border-radius: 27px; }
+      .status { height: 31px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: #626b64; font-size: 10px; font-weight: 650; }
+      .status-right { display: flex; gap: 7px; align-items: center; }
+      .signal { letter-spacing: 1px; }
+      .appbar { display: flex; height: 53px; align-items: center; justify-content: space-between; padding: 0 17px; border-bottom: 1px solid var(--line); background: #ffffffd9; }
+      .brand { display: flex; gap: 9px; align-items: center; font-size: 15px; font-weight: 760; letter-spacing: .03em; }
+      .brand-mark { display: grid; width: 27px; height: 27px; place-items: center; border-radius: 9px; background: var(--green); color: white; font-size: 14px; }
+      .category-title { margin-left: auto; margin-right: 10px; overflow: hidden; color: #6d756f; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+      .icon-btn { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border: 0; border-radius: 11px; background: transparent; color: #56615a; font-size: 18px; cursor: pointer; }
+      .icon-btn:active, .row:active { background: var(--green-soft); }
+      .content { position: absolute; inset: 84px 0 68px; overflow: auto; padding: 18px 17px 24px; }
+      .search { display: flex; height: 43px; align-items: center; gap: 9px; margin-bottom: 18px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: #818983; font-size: 13px; }
+      .section-label { margin: 0 0 8px 3px; color: #858d87; font-size: 10px; font-weight: 750; letter-spacing: .11em; text-transform: uppercase; }
+      .list { overflow: hidden; border: 1px solid var(--line); border-radius: 13px; background: white; }
+      .row { display: flex; min-height: 55px; align-items: center; gap: 11px; padding: 0 11px; border-bottom: 1px solid #eef1ed; cursor: pointer; }
+      .row:last-child { border-bottom: 0; }
+      .row.selected { background: #edfaf1; }
+      .row.child { padding-left: 28px; }
+      .twisty { width: 16px; color: #738077; font-size: 12px; text-align: center; }
+      .note-icon { display: grid; width: 29px; height: 29px; flex: 0 0 29px; place-items: center; border-radius: 9px; background: #f0f3ef; color: #4e6455; font-size: 14px; }
+      .row.selected .note-icon { background: #d7f1e0; color: var(--green); }
+      .row-title { min-width: 0; flex: 1; overflow: hidden; font-size: 13px; font-weight: 590; text-overflow: ellipsis; white-space: nowrap; }
+      .count { min-width: 21px; padding: 3px 6px; border-radius: 20px; background: #f0f2ef; color: #7c847e; font-size: 10px; text-align: center; }
+      .row.selected .count { background: #caead4; color: #256b42; }
+      .bottomnav { position: absolute; right: 0; bottom: 0; left: 0; display: flex; height: 68px; align-items: center; justify-content: space-around; border-top: 1px solid var(--line); background: #fffffff2; }
+      .navitem { display: grid; min-width: 62px; justify-items: center; gap: 4px; color: #828a84; font-size: 10px; }
+      .navitem span:first-child { font-size: 19px; }
+      .navitem.active { color: var(--green); font-weight: 700; }
+      .sheet-backdrop { position: absolute; inset: 0; z-index: 5; display: flex; align-items: flex-end; background: #16241b54; opacity: 0; pointer-events: none; transition: opacity .22s ease; }
+      .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+      .sheet { width: 100%; max-height: 86%; overflow: auto; padding: 9px 21px 28px; border-radius: 23px 23px 0 0; background: white; transform: translateY(30px); transition: transform .24s ease; }
+      .open .sheet { transform: translateY(0); }
+      .handle { width: 39px; height: 4px; margin: 2px auto 17px; border-radius: 4px; background: #d5dbd5; }
+      .sheet-top { display: flex; align-items: center; justify-content: space-between; }
+      .sheet-label { color: #747d76; font-size: 11px; }
+      .sheet h2 { margin: 14px 0; font-size: 24px; letter-spacing: -.025em; }
+      .sheet p { color: #4d5750; font-size: 14px; line-height: 1.8; }
+      .sheet .read { margin-top: 19px; padding: 10px 13px; border: 1px solid #d9e9dd; border-radius: 11px; background: #f0faf3; color: #267044; font-size: 13px; font-weight: 650; }
+      .drawer-backdrop { position: absolute; inset: 0; z-index: 6; display: flex; background: #17231a5c; opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+      .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+      .drawer { width: min(82%, 300px); height: 100%; padding: 24px 16px; background: white; transform: translateX(-100%); transition: transform .2s ease; }
+      .drawer-backdrop.open .drawer { transform: translateX(0); }
+      .drawer h2 { margin: 3px 0 24px; font-size: 17px; }
+      .drawer-row { display: flex; height: 49px; align-items: center; gap: 12px; padding: 0 10px; border-radius: 11px; color: #49534c; font-size: 13px; }
+      .drawer-row.active { background: var(--green-soft); color: #12663a; font-weight: 680; }
+      .map { display: none; position: absolute; inset: 84px 0 0; overflow: hidden; background-image: radial-gradient(#dfe6df 1px, transparent 1px); background-size: 18px 18px; }
+      .map svg { width: 100%; height: 100%; }
+      .map line { stroke: #aab5ac; stroke-width: 1.5; }
+      .map-node { fill: white; stroke: #d9e1da; stroke-width: 1.2; }
+      .map-node.selected { fill: #dff5e6; stroke: #76c68e; }
+      .map text { fill: #344239; font: 11px Inter, system-ui, sans-serif; }
+      .landscape-content { display: none; }
+      .map-fab { position: absolute; right: 12px; bottom: 15px; z-index: 2; display: grid; width: 43px; height: 43px; place-items: center; border: 0; border-radius: 14px; background: var(--green); color: white; box-shadow: 0 5px 15px #14733e40; font-size: 17px; }
+      .sheet-landscape { position: absolute; top: 84px; right: 0; bottom: 0; z-index: 3; width: min(355px, 42%); padding: 17px 18px; border-left: 1px solid var(--line); background: #fffffff2; box-shadow: -8px 0 24px #1d2d2010; transform: translateX(100%); transition: transform .22s ease; }
+      .sheet-landscape.open { transform: translateX(0); }
+      .landscape .content, .landscape .bottomnav { display: none; }
+      .landscape .map { display: block; }
+      .landscape .map-fab { display: none; }
+      .landscape .sheet-landscape { display: block; }
+      .status .landscape-time { display: none; }
+      .landscape .status .portrait-time { display: none; }
+      .landscape .status .landscape-time { display: inline; }
+      .landscape .category-title { margin-left: 14px; margin-right: auto; }
+      .landscape .status { height: 25px; }
+      .landscape .appbar { height: 49px; }
+      .landscape .map, .landscape .sheet-landscape { top: 74px; }
+      .landscape .landscape-content { display: block; }
+      @media (max-width: 800px) {
+        .page { padding: 27px 18px 34px; }
+        .demo { grid-template-columns: 1fr; gap: 24px; }
+        .controls { grid-row: 1; }
+        .device-wrap { grid-row: 2; }
+      }
+      @media (max-width: 500px) {
+        .page { padding: 22px 14px 32px; }
+        .controls { padding: 17px; }
+        .device { width: min(390px, calc(100vw - 28px)); height: min(844px, 73dvh); padding: 7px; border-radius: 36px; }
+        .screen { border-radius: 29px; }
+        .device.landscape { width: calc(100vw - 28px); height: min(390px, 56dvh); border-radius: 27px; }
+        .landscape .screen { border-radius: 20px; }
+      }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <p class="eyebrow">Protótipo interativo · Fase mobile</p>
+      <h1>O MENTE no celular</h1>
+      <p class="intro">A interface muda conforme a orientação: na vertical, a lista deixa as notas rápidas de navegar; na horizontal, o mapa ganha espaço. Toque nos controles para experimentar.</p>
+      <section class="demo" aria-label="Demonstração da interface mobile">
+        <div class="controls">
+          <h2 id="orientationTitle">Celular na vertical</h2>
+          <p id="orientationCopy">A lista em árvore é a tela principal. Toque numa nota para abrir seu conteúdo sem perder o contexto.</p>
+          <div class="switch" role="group" aria-label="Orientação do celular">
+            <button id="portraitButton" type="button" aria-pressed="true">▯ &nbsp; Vertical</button>
+            <button id="landscapeButton" type="button" aria-pressed="false">▱ &nbsp; Horizontal</button>
+          </div>
+          <div class="hint"><span class="hint-icon">☝</span><span><b>Experimente:</b> abra o menu ☰, toque numa nota ou alterne a orientação. No painel da nota, arraste a barrinha para fechar.</span></div>
+          <div class="hint"><span class="hint-icon">↗</span><span><b>O que continua igual:</b> suas notas ficam no mesmo banco local; este protótipo demonstra só uma nova forma de navegar nelas.</span></div>
+        </div>
+
+        <div class="device-wrap">
+          <div class="device" id="device">
+            <div class="screen">
+              <div class="status">
+                <span><span class="portrait-time">9:41</span><span class="landscape-time">9:41</span></span>
+                <span class="status-right"><span>●●●</span><span class="signal">▮▮▮</span><span>▰</span></span>
+              </div>
+              <header class="appbar">
+                <button class="icon-btn" id="openDrawer" aria-label="Abrir categorias" title="Categorias">☰</button>
+                <div class="brand"><span class="brand-mark">M</span><span>MENTE</span></div>
+                <span class="category-title">Plano de Estudos — História</span>
+                <button class="icon-btn" id="openSearch" aria-label="Buscar notas" title="Buscar">⌕</button>
+              </header>
+
+              <section class="content" aria-label="Lista de notas">
+                <div class="search"><span>⌕</span><span>Buscar notas</span><span style="margin-left:auto;color:#a1a8a2">⌘ K</span></div>
+                <p class="section-label">Notas · Plano de Estudos</p>
+                <div class="list">
+                  <div class="row"><span class="twisty">›</span><span class="note-icon">◷</span><span class="row-title">Como Estudar História</span><span class="count">3</span></div>
+                  <div class="row"><span class="twisty">›</span><span class="note-icon">▦</span><span class="row-title">Cronograma Semanal</span><span class="count">2</span></div>
+                  <div class="row selected" id="selectedNote" role="button" tabindex="0" aria-label="Abrir Linha do Tempo Mundial"><span class="twisty">⌄</span><span class="note-icon">◉</span><span class="row-title">Linha do Tempo Mundial</span><span class="count">4</span></div>
+                  <div class="row child"><span class="twisty">·</span><span class="note-icon">◷</span><span class="row-title">Pré-história e Antiguidade</span></div>
+                  <div class="row child"><span class="twisty">·</span><span class="note-icon">◷</span><span class="row-title">Idade Média</span></div>
+                  <div class="row child"><span class="twisty">·</span><span class="note-icon">◷</span><span class="row-title">Idade Moderna</span></div>
+                  <div class="row child"><span class="twisty">·</span><span class="note-icon">◷</span><span class="row-title">Idade Contemporânea</span></div>
+                  <div class="row"><span class="twisty">›</span><span class="note-icon">◉</span><span class="row-title">História do Brasil</span><span class="count">6</span></div>
+                  <div class="row"><span class="twisty">·</span><span class="note-icon">▤</span><span class="row-title">Bibliografia e Recursos</span></div>
+                  <div class="row"><span class="twisty">·</span><span class="note-icon">☑</span><span class="row-title">Checklist de Revisão</span></div>
+                </div>
+              </section>
+
+              <nav class="bottomnav" aria-label="Navegação principal">
+                <div class="navitem active"><span>☷</span><span>Notas</span></div>
+                <div class="navitem" id="navCategories" role="button" tabindex="0"><span>▣</span><span>Categorias</span></div>
+                <div class="navitem" role="button" tabindex="0" id="navSearch"><span>⌕</span><span>Buscar</span></div>
+                <div class="navitem"><span>⚙</span><span>Ajustes</span></div>
+              </nav>
+
+              <section class="map" aria-label="Mapa visual da árvore">
+                <svg viewBox="0 0 600 390" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mapa de notas conectadas">
+                  <line x1="75" y1="191" x2="205" y2="78"/><line x1="75" y1="191" x2="205" y2="137"/><line x1="75" y1="191" x2="205" y2="196"/><line x1="75" y1="191" x2="205" y2="255"/><line x1="75" y1="191" x2="205" y2="314"/>
+                  <line x1="362" y1="196" x2="442" y2="151"/><line x1="362" y1="196" x2="442" y2="196"/><line x1="362" y1="196" x2="442" y2="241"/><line x1="362" y1="196" x2="442" y2="286"/>
+                  <rect class="map-node" x="18" y="170" width="114" height="42" rx="10"/><text x="35" y="195">História</text>
+                  <rect class="map-node" x="205" y="61" width="158" height="35" rx="9"/><text x="219" y="83">Como Estudar</text>
+                  <rect class="map-node" x="205" y="120" width="158" height="35" rx="9"/><text x="219" y="142">Cronograma</text>
+                  <rect class="map-node selected" x="205" y="178" width="158" height="36" rx="9"/><text x="219" y="201">Linha do Tempo</text>
+                  <rect class="map-node" x="205" y="238" width="158" height="35" rx="9"/><text x="219" y="260">História do Brasil</text>
+                  <rect class="map-node" x="205" y="297" width="158" height="35" rx="9"/><text x="219" y="319">Bibliografia</text>
+                  <rect class="map-node" x="442" y="136" width="140" height="30" rx="8"/><text x="454" y="155">Antiguidade</text>
+                  <rect class="map-node" x="442" y="181" width="140" height="30" rx="8"/><text x="454" y="200">Idade Média</text>
+                  <rect class="map-node" x="442" y="226" width="140" height="30" rx="8"/><text x="454" y="245">Idade Moderna</text>
+                  <rect class="map-node" x="442" y="271" width="140" height="30" rx="8"/><text x="454" y="290">Contemporânea</text>
+                </svg>
+                <button class="map-fab" id="openMapNote" aria-label="Abrir nota selecionada">▤</button>
+                <aside class="sheet-landscape" id="landscapeNote">
+                  <div class="sheet-top"><span class="sheet-label">NOTA SELECIONADA</span><button class="icon-btn closeLandscape" aria-label="Fechar nota">×</button></div>
+                  <h2>Linha do Tempo Mundial</h2>
+                  <p>Uma visão geral dos grandes períodos históricos. Toque nos cartões para abrir cada resumo.</p>
+                  <button class="read">Abrir conteúdo da nota&nbsp; →</button>
+                </aside>
+              </section>
+
+              <div class="sheet-backdrop" id="noteBackdrop">
+                <article class="sheet" aria-label="Prévia da nota">
+                  <div class="handle"></div>
+                  <div class="sheet-top"><span class="sheet-label">NOTA · HISTÓRIA</span><button class="icon-btn closeSheet" aria-label="Fechar nota">⌄</button></div>
+                  <h2>Linha do Tempo Mundial</h2>
+                  <p>Uma visão geral dos grandes períodos. Abra o resumo de cada um para consultar acontecimentos, datas e personagens importantes.</p>
+                  <p><b>Pré-história e Antiguidade</b> — do surgimento da escrita à queda do Império Romano.</p>
+                  <button class="read">Continuar lendo&nbsp; →</button>
+                </article>
+              </div>
+
+              <div class="drawer-backdrop" id="drawerBackdrop">
+                <nav class="drawer" aria-label="Categorias">
+                  <h2>Categorias</h2>
+                  <div class="drawer-row active"><span>▣</span><span>Plano de Estudos</span></div>
+                  <div class="drawer-row"><span>♧</span><span>Leituras</span></div>
+                  <div class="drawer-row"><span>⌂</span><span>Projetos</span></div>
+                  <div class="drawer-row"><span>◌</span><span>Ideias</span></div>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script>
+      const device = document.getElementById('device');
+      const portraitButton = document.getElementById('portraitButton');
+      const landscapeButton = document.getElementById('landscapeButton');
+      const title = document.getElementById('orientationTitle');
+      const copy = document.getElementById('orientationCopy');
+      const sheet = document.getElementById('noteBackdrop');
+      const drawer = document.getElementById('drawerBackdrop');
+      const landscapeNote = document.getElementById('landscapeNote');
+
+      function setOrientation(landscape) {
+        device.classList.toggle('landscape', landscape);
+        portraitButton.setAttribute('aria-pressed', String(!landscape));
+        landscapeButton.setAttribute('aria-pressed', String(landscape));
+        title.textContent = landscape ? 'Celular na horizontal' : 'Celular na vertical';
+        copy.textContent = landscape
+          ? 'O mapa da árvore aproveita a largura. A nota abre num painel lateral, sem cobrir os ramos.'
+          : 'A lista em árvore é a tela principal. Toque numa nota para abrir seu conteúdo sem perder o contexto.';
+        sheet.classList.remove('open');
+        landscapeNote.classList.remove('open');
+      }
+
+      portraitButton.addEventListener('click', () => setOrientation(false));
+      landscapeButton.addEventListener('click', () => setOrientation(true));
+      document.getElementById('openDrawer').addEventListener('click', () => drawer.classList.add('open'));
+      document.getElementById('navCategories').addEventListener('click', () => drawer.classList.add('open'));
+      document.getElementById('navSearch').addEventListener('click', () => document.querySelector('.search').scrollIntoView({ behavior: 'smooth' }));
+      document.getElementById('openSearch').addEventListener('click', () => document.querySelector('.search').scrollIntoView({ behavior: 'smooth' }));
+      document.getElementById('selectedNote').addEventListener('click', () => sheet.classList.add('open'));
+      document.getElementById('selectedNote').addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') sheet.classList.add('open'); });
+      document.getElementById('openMapNote').addEventListener('click', () => landscapeNote.classList.add('open'));
+      document.querySelectorAll('.closeSheet').forEach((button) => button.addEventListener('click', () => sheet.classList.remove('open')));
+      document.querySelector('.closeLandscape').addEventListener('click', () => landscapeNote.classList.remove('open'));
+      drawer.addEventListener('click', (event) => { if (event.target === drawer) drawer.classList.remove('open'); });
+      sheet.addEventListener('click', (event) => { if (event.target === sheet) sheet.classList.remove('open'); });
+      let startY = 0;
+      document.querySelector('.handle').addEventListener('pointerdown', (event) => { startY = event.clientY; event.currentTarget.setPointerCapture(event.pointerId); });
+      document.querySelector('.handle').addEventListener('pointerup', (event) => { if (event.clientY > startY + 30) sheet.classList.remove('open'); });
+    </script>
+  </body>
+</html>
