@@ -24,7 +24,7 @@ export function WikilinkNodeView({ node, updateAttributes }: NodeViewProps) {
             ? t('editor.abrirWikilink', { nome: displayedTitle })
             : t('editor.criarWikilink', { nome: displayedTitle })
         }
-        className={`mx-0.5 inline rounded px-1 py-0.5 align-baseline text-sm font-medium underline decoration-dotted underline-offset-2 ${resolved ? 'bg-accent-bg text-accent' : 'border border-dashed border-danger/50 bg-danger/10 text-danger'}`}
+        className={`mx-0.5 inline rounded-md bg-accent-softer px-[7px] py-0.5 align-baseline font-mono text-[12.5px] font-medium hover:bg-accent-soft hover:underline ${resolved ? 'text-accent-text' : 'border border-dashed border-danger/50 text-danger'}`}
         onMouseDown={(event) => event.preventDefault()}
         onClick={(event) => {
           event.preventDefault();
@@ -47,7 +47,13 @@ export function WikilinkNodeView({ node, updateAttributes }: NodeViewProps) {
           })();
         }}
       >
+        <span aria-hidden="true" className="text-[10.5px] opacity-50">
+          {'[['}
+        </span>
         {displayedTitle}
+        <span aria-hidden="true" className="text-[10.5px] opacity-50">
+          {']]'}
+        </span>
       </button>
     </NodeViewWrapper>
   );

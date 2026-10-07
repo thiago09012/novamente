@@ -1,6 +1,6 @@
-# Plano de evolução do Neuronow
+# Plano de evolução do Novamente
 
-Este plano segue as sete fases e critérios de aceite de `prompt-mestre-mente.md`. A instrução do usuário em 06/10/2026 autoriza avançar automaticamente entre fases, sem interromper nos portões de aprovação descritos no prompt. Cada fase ainda deve terminar com verificações, atualização de documentação e registro de pendências.
+Este plano segue as sete fases e critérios de aceite de `prompt-mestre-novamente.md`. A instrução do usuário em 06/10/2026 autoriza avançar automaticamente entre fases, sem interromper nos portões de aprovação descritos no prompt. Cada fase ainda deve terminar com verificações, atualização de documentação e registro de pendências.
 
 ## Estado e sequência
 
@@ -33,9 +33,9 @@ Este plano segue as sete fases e critérios de aceite de `prompt-mestre-mente.md
 ## IA para projetos — primeira entrega
 
 - ✅ Exportação de contexto da categoria ativa pelo app, sem modificar notas e com IDs, caminhos, tags e wikilinks.
-- ✅ Pasta Markdown compatível com Obsidian; após sincronizar, gravações do app são write-through e a sincronização usa snapshot de três vias, preservando divergências em `.mente/conflicts/`.
+- ✅ Pasta Markdown compatível com Obsidian; após sincronizar, gravações do app são write-through e a sincronização usa snapshot de três vias, preservando divergências em `.novamente/conflicts/`.
 - ✅ `ai:context` limita o resultado por orçamento aproximado de tokens, ancora no resumo do projeto e inclui pais, wikilinks e backlinks com proveniência.
-- ✅ `ai:prepare --root` cria um vault com uma categoria/projeto e seus descendentes; `.mente/base.json` contém somente esse escopo.
+- ✅ `ai:prepare --root` cria um vault com uma categoria/projeto e seus descendentes; `.novamente/base.json` contém somente esse escopo.
 - ✅ `ai:package --root --base` exige um backup completo atual, rejeita mudanças para fora do projeto e gera relatório de alterações/conflitos.
 - ⏳ Próximas melhorias: sincronização automática sem clique, busca semântica opt-in, fila de propostas no app, histórico durável e interface local de ferramentas para agentes.
 

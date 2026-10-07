@@ -4,7 +4,7 @@ import { isQuotaExceededError } from '@/db/storageErrors';
 import { writeMarkdownBeforeDatabase } from '@/db/markdownVaultWriteGate';
 import { switchToMemoryOnly } from '@/app/runtime';
 
-import type { MenteDatabase } from '../database';
+import type { NovamenteDatabase } from '../database';
 import type {
   LinksRepository,
   MetaRepository,
@@ -26,7 +26,7 @@ async function withQuotaFallback<T>(
   }
 }
 
-function createNotesRepository(db: MenteDatabase): NotesRepository {
+function createNotesRepository(db: NovamenteDatabase): NotesRepository {
   return {
     getAll: () => db.notes.toArray(),
     getById: (id) => db.notes.get(id),
@@ -99,7 +99,7 @@ function createNotesRepository(db: MenteDatabase): NotesRepository {
   };
 }
 
-function createLinksRepository(db: MenteDatabase): LinksRepository {
+function createLinksRepository(db: NovamenteDatabase): LinksRepository {
   return {
     getAll: () => db.links.toArray(),
     getByFrom: (fromId) => db.links.where('fromId').equals(fromId).toArray(),
@@ -124,7 +124,7 @@ function createLinksRepository(db: MenteDatabase): LinksRepository {
   };
 }
 
-function createSettingsRepository(db: MenteDatabase): SettingsRepository {
+function createSettingsRepository(db: NovamenteDatabase): SettingsRepository {
   return {
     async get() {
       const row = await db.settings.get(SETTINGS_KEY);
@@ -146,7 +146,7 @@ function createSettingsRepository(db: MenteDatabase): SettingsRepository {
   };
 }
 
-function createViewsRepository(db: MenteDatabase): ViewsRepository {
+function createViewsRepository(db: NovamenteDatabase): ViewsRepository {
   return {
     get: (rootId) => db.views.get(rootId),
     async put(view) {
@@ -166,7 +166,7 @@ function createViewsRepository(db: MenteDatabase): ViewsRepository {
   };
 }
 
-function createMetaRepository(db: MenteDatabase): MetaRepository {
+function createMetaRepository(db: NovamenteDatabase): MetaRepository {
   return {
     async get<T>(key: string) {
       const row = await db.meta.get(key);
@@ -181,7 +181,7 @@ function createMetaRepository(db: MenteDatabase): MetaRepository {
   };
 }
 
-export function createDexieRepositories(db: MenteDatabase): Repositories {
+export function createDexieRepositories(db: NovamenteDatabase): Repositories {
   return {
     notes: createNotesRepository(db),
     links: createLinksRepository(db),

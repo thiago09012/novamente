@@ -59,7 +59,7 @@ export function CloudBackupControls() {
     setStatus('');
     try {
       const backup = await runtime().exportBackup();
-      const { error: upsertError } = await supabase.from('mente_backups').upsert({
+      const { error: upsertError } = await supabase.from('novamente_backups').upsert({
         user_id: session.user.id,
         backup: JSON.parse(JSON.stringify(backup)) as Json,
       });
@@ -79,7 +79,7 @@ export function CloudBackupControls() {
     setStatus('');
     try {
       const { data, error: fetchError } = await supabase
-        .from('mente_backups')
+        .from('novamente_backups')
         .select('backup')
         .eq('user_id', session.user.id)
         .maybeSingle();

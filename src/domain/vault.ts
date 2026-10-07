@@ -21,18 +21,20 @@ import { defaultSettings } from './settings';
 
 export type { MarkdownFile } from './markdown';
 
-export const VAULT_FORMAT = 'mente-vault';
+export const VAULT_FORMAT = 'novamente-vault';
+const LEGACY_VAULT_FORMAT = 'mente-vault';
 export const VAULT_VERSION = 1;
-export const MANIFEST_DIR = '.mente';
+export const MANIFEST_DIR = '.novamente';
+export const LEGACY_MANIFEST_DIR = '.mente';
 export const MANIFEST_FILE = 'manifest.json';
 export const INDEX_FILENAME = '_index.md';
 export const VAULT_GUIDE_FILE = 'AGENTES.md';
 
 /** Instruções embutidas no vault para qualquer IA que abrir a pasta. */
-export const VAULT_GUIDE_MARKDOWN = `# Vault do Neuronow — instruções para IA
+export const VAULT_GUIDE_MARKDOWN = `# Vault do Novamente — instruções para IA
 
-Esta pasta é um **vault Markdown** exportado do app Neuronow. Cada \`.md\` é uma
-nota; pastas espelham a hierarquia; \`.mente/\` guarda o manifesto e este guia
+Esta pasta é um **vault Markdown** exportado do app Novamente. Cada \`.md\` é uma
+nota; pastas espelham a hierarquia; \`.novamente/\` guarda o manifesto e este guia
 (e nunca é lido como nota).
 
 ## Trabalhar em projetos
@@ -56,7 +58,7 @@ nota; pastas espelham a hierarquia; \`.mente/\` guarda o manifesto e este guia
    \`parentId\`, \`orderKey\`, \`title\`, \`tags\`, \`icon\`, \`color\`,
    \`createdAt\`, \`updatedAt\`. Nunca apague nem troque o \`id\`.
 2. Pode reescrever o arquivo de forma mínima (só \`id:\`): os campos ausentes
-   são herdados do snapshot \`.mente/base.json\`; o ideal é manter o frontmatter
+   são herdados do snapshot \`.novamente/base.json\`; o ideal é manter o frontmatter
    completo para preservar a versão em que a IA trabalhou.
 3. **Hierarquia**: \`_index.md\` é uma nota que tem filhos (pasta). O pai
    verdadeiro é \`parentId\` no frontmatter; o caminho da pasta só é usado
@@ -79,28 +81,28 @@ nota; pastas espelham a hierarquia; \`.mente/\` guarda o manifesto e este guia
 
 - **App**: Configurações → Dados → Importar arquivo → escolher o JSON
   gerado pelo CLI (substitui os dados; confirme antes).
-- **CLI** (repositório Neuronow):
-  \`npm run mente -- vault:import --vault <pasta> --base backup.json --out merged.json\`
+- **CLI** (repositório Novamente):
+  \`npm run novamente -- vault:import --vault <pasta> --base backup.json --out merged.json\`
 
 ## Vault limitado a um projeto
 
 Prepare o vault com \`--root "Categoria do projeto"\`. Só essa categoria e
-seus descendentes entram nos arquivos e no \`.mente/base.json\`. Ao empacotar,
+seus descendentes entram nos arquivos e no \`.novamente/base.json\`. Ao empacotar,
 exporte um backup completo atualizado no app e informe o mesmo projeto com
 \`--base backup-atual.json --root "Categoria do projeto"\`. O CLI rejeita
 alterações que tentem criar ou mover notas para fora desse escopo e gera um
-relatório em \`.mente/review.md\` antes da importação.
-O snapshot em \`.mente/base.json\` fornece metadados originais; o backup
+relatório em \`.novamente/review.md\` antes da importação.
+O snapshot em \`.novamente/base.json\` fornece metadados originais; o backup
 completo mais recente protege alterações feitas no app enquanto a IA trabalha.
 
 ## CLI rápida
 
 \`\`\`bash
-npm run mente -- help
-npm run mente -- tree --vault <pasta>
-npm run mente -- search "consulta" --vault <pasta>
-npm run mente -- read --path caminho/nota.md --vault <pasta>
-npm run neuronow -- ai:context "prazo do projeto" --vault <pasta> --budget 1800
+npm run novamente -- help
+npm run novamente -- tree --vault <pasta>
+npm run novamente -- search "consulta" --vault <pasta>
+npm run novamente -- read --path caminho/nota.md --vault <pasta>
+npm run novamente -- ai:context "prazo do projeto" --vault <pasta> --budget 1800
 \`\`\`
 `;
 
@@ -218,7 +220,10 @@ export function parseManifest(raw: unknown): VaultManifest {
     throw new Error('Manifesto do vault inválido.');
   }
   const record = raw as Record<string, unknown>;
-  if (record.format !== VAULT_FORMAT || record.version !== VAULT_VERSION) {
+  if (
+    (record.format !== VAULT_FORMAT && record.format !== LEGACY_VAULT_FORMAT) ||
+    record.version !== VAULT_VERSION
+  ) {
     throw new Error('Formato ou versão de vault não suportado.');
   }
   const notesRaw = record.notes;
@@ -251,7 +256,10 @@ export function loadVaultNotes(
 ): Note[] {
   const baseById = new Map((options.base ?? []).map((note) => [note.id, note]));
   const parsedFiles = files.filter(
-    (file) => !file.path.startsWith(`${MANIFEST_DIR}/`) && file.path.endsWith('.md'),
+    (file) =>
+      !file.path.startsWith(`${MANIFEST_DIR}/`) &&
+      !file.path.startsWith(`${LEGACY_MANIFEST_DIR}/`) &&
+      file.path.endsWith('.md'),
   );
   const parsed = parsedFiles.map((file) => {
     const first = markdownToNote(file.markdown);

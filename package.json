@@ -1,5 +1,5 @@
 {
-  "name": "neuronow",
+  "name": "novamente",
   "version": "0.1.0",
   "license": "MIT",
   "type": "module",
@@ -17,12 +17,11 @@
     "e2e": "playwright test",
     "perf:stress": "npm run build && PLAYWRIGHT_USE_PREVIEW=1 PLAYWRIGHT_STRESS=1 playwright test e2e/stress.spec.ts",
     "seed:stress": "tsx scripts/seed-stress.ts",
-    "neuronow": "tsx scripts/mente.ts",
-    "mente": "tsx scripts/mente.ts",
+    "novamente": "tsx scripts/novamente.ts",
     "mcp": "tsx scripts/mcp-server.ts",
-    "mente:connect": "tsx scripts/mente-connect.ts",
-    "vault:export": "tsx scripts/mente.ts vault:export",
-    "vault:import": "tsx scripts/mente.ts vault:import",
+    "novamente:connect": "tsx scripts/novamente-connect.ts",
+    "vault:export": "tsx scripts/novamente.ts vault:export",
+    "vault:import": "tsx scripts/novamente.ts vault:import",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {

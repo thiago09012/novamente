@@ -95,13 +95,13 @@ export const CanvasNode = memo(function CanvasNode({
       aria-label={label}
       tabIndex={tabStop && !renaming ? 0 : -1}
       title={label}
-      className={`group absolute flex cursor-pointer items-center gap-1.5 rounded-[var(--radius)] border pr-2 shadow-sm transition-[transform,border-color,background-color] duration-[var(--dur)] ease-[var(--ease)] select-none ${
+      className={`group absolute flex cursor-grab items-center gap-2 rounded-[var(--radius-lg)] border pr-3.5 shadow-[var(--shadow-sm)] backdrop-blur-xl transition-[transform,border-color,background-color,box-shadow] duration-[var(--dur)] ease-[var(--ease)] select-none hover:-translate-y-0.5 hover:shadow-[var(--shadow)] active:scale-[0.99] ${
         node.hasChildren ? 'border-border' : 'border-dashed border-border'
       } ${
         selected
-          ? 'z-10 border-accent bg-accent-bg text-on-accent shadow-[var(--glow)]'
-          : 'bg-bg-node text-text hover:border-border-strong'
-      } ${renaming ? 'z-20 cursor-default' : ''} ${dragging || touchDragging ? 'opacity-60' : ''} ${dropTarget || touchDropTarget ? 'border-dashed border-accent ring-2 ring-accent/30' : ''}`}
+          ? 'z-10 border-accent bg-material-strong text-text shadow-[var(--glow-shadow)]'
+          : 'bg-material-strong text-text hover:border-border-strong'
+      } ${renaming ? 'z-20 cursor-default' : ''} ${dragging || touchDragging ? 'cursor-grabbing opacity-60' : ''} ${dropTarget || touchDropTarget ? 'border-dashed border-accent ring-2 ring-accent/30' : ''}`}
       draggable={!renaming}
       style={{
         transform: `translate(${node.x}px, ${node.y}px)`,
@@ -129,7 +129,7 @@ export const CanvasNode = memo(function CanvasNode({
       onDragStart={(event) => {
         event.stopPropagation();
         event.dataTransfer.effectAllowed = 'move';
-        event.dataTransfer.setData('application/x-mente-note', node.id);
+        event.dataTransfer.setData('application/x-novamente-note', node.id);
         event.dataTransfer.setData('text/plain', node.id);
         setDragging(true);
       }}
@@ -147,7 +147,7 @@ export const CanvasNode = memo(function CanvasNode({
         event.preventDefault();
         event.stopPropagation();
         setDropTarget(false);
-        const sourceId = event.dataTransfer.getData('application/x-mente-note') || event.dataTransfer.getData('text/plain');
+        const sourceId = event.dataTransfer.getData('application/x-novamente-note') || event.dataTransfer.getData('text/plain');
         if (sourceId && sourceId !== node.id) {
           const rect = event.currentTarget.getBoundingClientRect();
           const relativeY = (event.clientY - rect.top) / Math.max(rect.height, 1);
@@ -177,13 +177,13 @@ export const CanvasNode = memo(function CanvasNode({
       <Icon
         name={note.icon}
         size={14}
-        className={`shrink-0 ${selected ? 'text-on-accent' : 'text-muted'}`}
+        className={`shrink-0 ${selected ? 'text-accent' : 'text-muted'}`}
       />
 
       {hasContent(note) ? (
         <span
           aria-hidden="true"
-          className={`h-1.5 w-1.5 shrink-0 rounded-full ${selected ? 'bg-on-accent/70' : 'bg-border-strong'}`}
+          className={`h-2 w-2 shrink-0 rounded-full ${selected ? 'bg-accent shadow-[0_0_10px_var(--glow)]' : 'bg-faint'}`}
         />
       ) : null}
 
@@ -234,7 +234,7 @@ export const CanvasNode = memo(function CanvasNode({
           data-node-badge
           aria-hidden="true"
           className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] leading-none tabular-nums ${
-            selected ? 'bg-on-accent/20 text-on-accent' : 'bg-bg-hover text-muted'
+            selected ? 'bg-accent-soft text-accent' : 'bg-bg-hover text-muted'
           } ${simplified ? 'invisible' : ''}`}
         >
           {node.childCount}

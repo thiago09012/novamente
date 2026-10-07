@@ -299,7 +299,7 @@ export function RichTextEditor({
 
   return (
     <div className="relative" onKeyDown={handleKeyDown}>
-      {!readOnly ? <div className="sticky top-0 z-10 flex flex-wrap gap-1 border-b border-border bg-bg-editor/95 py-2 backdrop-blur">
+      {!readOnly ? <div className="sticky top-0 z-10 flex flex-wrap gap-1 border-b border-border bg-material py-2 backdrop-blur-xl">
         <Button variant="ghost" size="sm" aria-label={t('editor.negrito')} aria-pressed={editor?.isActive('bold') ?? false} onClick={() => editor?.chain().focus().toggleBold().run()}>B</Button>
         <Button variant="ghost" size="sm" aria-label={t('editor.italico')} aria-pressed={editor?.isActive('italic') ?? false} onClick={() => editor?.chain().focus().toggleItalic().run()}><i>I</i></Button>
         <Button variant="ghost" size="sm" aria-label={t('editor.tachado')} onClick={() => editor?.chain().focus().toggleStrike().run()}><s>S</s></Button>

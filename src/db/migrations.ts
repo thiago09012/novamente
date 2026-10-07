@@ -5,11 +5,11 @@ import {
   sanitizeSettings,
 } from '@/domain/settings';
 
-import type { MenteDatabase } from './database';
+import type { NovamenteDatabase } from './database';
 
 export interface DataMigration {
   toVersion: number;
-  run(db: MenteDatabase): Promise<void>;
+  run(db: NovamenteDatabase): Promise<void>;
 }
 
 /**
@@ -33,7 +33,7 @@ export interface MigrationResult {
 }
 
 /** Aplica todas as migrações pendentes em ordem. Retorna de/para. */
-export async function applyDataMigrations(db: MenteDatabase): Promise<MigrationResult> {
+export async function applyDataMigrations(db: NovamenteDatabase): Promise<MigrationResult> {
   const row = await db.settings.get(SETTINGS_KEY);
   const from = typeof row?.schemaVersion === 'number' ? row.schemaVersion : 0;
   let current = from;

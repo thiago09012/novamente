@@ -30,7 +30,7 @@ function standardEntry(context: McpCommandContext) {
     command: context.nodePath,
     args: [context.tsxPath, context.serverPath],
     cwd: context.repoDir,
-    env: { MENTE_VAULT_DIR: context.vaultDir, MENTE_BASE_BACKUP: context.basePath },
+    env: { NOVAMENTE_VAULT_DIR: context.vaultDir, NOVAMENTE_BASE_BACKUP: context.basePath },
   };
 }
 
@@ -105,7 +105,7 @@ export const MCP_CLIENTS: readonly McpClientDefinition[] = [
       name: context.name,
       type: 'local',
       command: [context.nodePath, context.tsxPath, context.serverPath],
-      environment: { MENTE_VAULT_DIR: context.vaultDir, MENTE_BASE_BACKUP: context.basePath },
+      environment: { NOVAMENTE_VAULT_DIR: context.vaultDir, NOVAMENTE_BASE_BACKUP: context.basePath },
       enabled: true,
     }),
     afterInstall: 'Reabra o opencode para carregar a configuração MCP.',

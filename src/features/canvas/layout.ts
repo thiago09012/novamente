@@ -45,6 +45,8 @@ export interface LayoutEdge {
   id: ID;
   parentId: ID;
   childId: ID;
+  /** Origem real do link (só em arestas de wikilink; difere de parentId). */
+  fromId?: ID;
   x1: number;
   y1: number;
   x2: number;

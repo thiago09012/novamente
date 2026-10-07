@@ -11,10 +11,12 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    'bg-accent text-[var(--text-on-accent-button)] border border-transparent hover:brightness-110 active:brightness-95',
-  secondary: 'bg-bg-raised text-text border border-border-strong hover:bg-bg-hover',
-  ghost: 'bg-transparent text-text border border-transparent hover:bg-bg-hover',
-  danger: 'bg-danger-bg text-danger border border-transparent hover:brightness-110',
+    'bg-accent text-white border border-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] hover:brightness-[1.08] active:brightness-95 active:scale-[0.98]',
+  secondary:
+    'bg-bg-raised text-text border border-border hover:bg-bg-hover active:scale-[0.98]',
+  ghost: 'bg-transparent text-text border border-transparent hover:bg-bg-hover active:scale-[0.98]',
+  danger:
+    'bg-danger-bg text-danger border border-transparent hover:brightness-110 active:scale-[0.98]',
 };
 
 const SIZES: Record<ButtonSize, string> = {

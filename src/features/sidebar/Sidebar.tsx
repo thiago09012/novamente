@@ -33,9 +33,11 @@ const LONG_PRESS_MS = 500;
 export function Sidebar({
   collapsedOverride,
   hideCollapseControl = false,
+  hideTrashButton = false,
 }: {
   collapsedOverride?: boolean;
   hideCollapseControl?: boolean;
+  hideTrashButton?: boolean;
 }) {
   const categories = useCategories();
   const trashCount = useTrashCount();
@@ -58,7 +60,8 @@ export function Sidebar({
 
   const index = useMemo(() => buildIndex(Object.values(notes.byId)), [notes.byId]);
   const descendantCounts = useMemo(
-    () => new Map(categories.map((category) => [category.id, countDescendants(index, category.id)])),
+    () =>
+      new Map(categories.map((category) => [category.id, countDescendants(index, category.id)])),
     [categories, index],
   );
   const collapsed = collapsedOverride ?? settings.sidebarCollapsed;
@@ -254,8 +257,8 @@ export function Sidebar({
   return (
     <aside
       ref={asideRef}
-      className={`flex h-full shrink-0 flex-col border-r border-border bg-bg-sidebar transition-[width] duration-[var(--dur-slow)] ${
-        collapsed ? 'w-14' : 'w-60'
+      className={`flex h-full shrink-0 flex-col border-r border-border bg-material-strong backdrop-blur-xl transition-[width] duration-[var(--dur-slow)] ${
+        collapsed ? 'w-14' : 'w-70'
       }`}
       aria-label={t('a11y.barraLateral')}
     >
@@ -295,19 +298,6 @@ export function Sidebar({
         >
           {collapsed ? '' : t('sidebar.novaCategoria')}
         </Button>
-      </div>
-
-      <div className={collapsed ? 'px-2 pb-2' : 'px-3 pb-2'}>
-        <button
-          type="button"
-          onClick={() => openDialog('search')}
-          aria-label={t('search.titulo')}
-          title={`${t('search.titulo')} (Ctrl+K)`}
-          className={`flex h-10 w-full items-center gap-2 rounded-[var(--radius-sm)] border border-border bg-bg-app px-2 text-sm text-muted hover:border-border-strong hover:text-text ${collapsed ? 'justify-center' : ''}`}
-        >
-          <Icon name="search" size={15} />
-          {!collapsed ? <><span className="flex-1 text-left">{t('search.titulo')}</span><kbd className="text-[10px]">Ctrl+K</kbd></> : null}
-        </button>
       </div>
 
       {/* Lista de categorias */}
@@ -397,7 +387,9 @@ export function Sidebar({
                           event.preventDefault();
                           event.stopPropagation();
                           setDropCategoryId(null);
-                          const sourceId = event.dataTransfer.getData('application/x-mente-note') || event.dataTransfer.getData('text/plain');
+                          const sourceId =
+                            event.dataTransfer.getData('application/x-novamente-note') ||
+                            event.dataTransfer.getData('text/plain');
                           if (!sourceId) return;
                           void useNotesStore
                             .getState()
@@ -411,7 +403,7 @@ export function Sidebar({
                         title={collapsed ? label : undefined}
                         className={`flex h-11 w-full items-center gap-2 rounded-[var(--radius)] border px-2 pr-9 text-left transition-colors ${dropCategoryId === cat.id ? 'border-dashed border-accent ring-2 ring-accent/30' : ''} ${
                           isActive
-                            ? 'border-accent bg-accent-bg text-on-accent'
+                            ? 'border-accent/40 bg-accent-soft text-text'
                             : 'border-transparent text-text hover:bg-bg-hover'
                         }`}
                         style={
@@ -420,11 +412,15 @@ export function Sidebar({
                             : undefined
                         }
                       >
-                        <Icon name={cat.icon} size={16} className="shrink-0" />
+                        <Icon
+                          name={cat.icon}
+                          size={16}
+                          className={`shrink-0 ${isActive ? 'text-accent' : ''}`}
+                        />
                         <span className="truncate text-sm font-medium">{label}</span>
                         {!collapsed && count > 0 ? (
                           <span
-                            className={`ml-auto text-xs tabular-nums ${isActive ? 'text-on-accent/80' : 'text-muted'}`}
+                            className={`ml-auto text-xs tabular-nums ${isActive ? 'text-accent' : 'text-muted'}`}
                           >
                             {count}
                           </span>
@@ -452,24 +448,20 @@ export function Sidebar({
 
       {/* Rodapé */}
       <div className="flex flex-col gap-1 border-t border-border p-2">
-        <FooterButton
-          collapsed={collapsed}
-          icon={<Icon name="trash" size={16} />}
-          label={t('trash.abrir')}
-          badge={trashCount > 0 ? trashCount : undefined}
-          onClick={() => openDialog('trash')}
-        />
+        {!hideTrashButton ? (
+          <FooterButton
+            collapsed={collapsed}
+            icon={<Icon name="trash" size={16} />}
+            label={t('trash.abrir')}
+            badge={trashCount > 0 ? trashCount : undefined}
+            onClick={() => openDialog('trash')}
+          />
+        ) : null}
         <FooterButton
           collapsed={collapsed}
           icon={<Icon name="settings" size={16} />}
           label={t('settings.abrir')}
           onClick={() => openDialog('settings')}
-        />
-        <FooterButton
-          collapsed={collapsed}
-          icon={<Icon name="help" size={16} />}
-          label={t('help.abrir')}
-          onClick={() => openDialog('help')}
         />
       </div>
 

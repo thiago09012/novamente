@@ -22,7 +22,7 @@ function cspMetaPlugin(): Plugin {
   ].join('; ');
 
   return {
-    name: 'mente-csp',
+    name: 'novamente-csp',
     transformIndexHtml(html, ctx) {
       if (ctx.server) return html;
       return {

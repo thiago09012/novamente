@@ -33,7 +33,7 @@ test('migra para memória após QuotaExceeded e preserva a operação para expor
   await page.getByRole('button', { name: 'Abrir configurações' }).click();
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Exportar backup JSON' }).click();
-  expect((await downloadPromise).suggestedFilename()).toMatch(/mente-backup-.*\.json/u);
+  expect((await downloadPromise).suggestedFilename()).toMatch(/novamente-backup-.*\.json/u);
 });
 
 test('continua sem IndexedDB, mostra aviso e permite exportar', async ({ page }) => {
@@ -58,5 +58,5 @@ test('continua sem IndexedDB, mostra aviso e permite exportar', async ({ page })
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Exportar backup JSON' }).click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toMatch(/mente-backup-.*\.json/u);
+  expect(download.suggestedFilename()).toMatch(/novamente-backup-.*\.json/u);
 });

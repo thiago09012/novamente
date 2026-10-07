@@ -3,9 +3,9 @@ import { createBackup, parseBackup, type BackupFile } from '@/domain/backup';
 import { planGraphRepair } from './repairGraph';
 import { publishDatabaseChange } from './sync';
 
-import type { MenteDatabase } from './database';
+import type { NovamenteDatabase } from './database';
 
-export async function exportDatabase(db: MenteDatabase): Promise<BackupFile> {
+export async function exportDatabase(db: NovamenteDatabase): Promise<BackupFile> {
   const [notes, links, settings, views, meta] = await db.transaction(
     'r',
     db.notes,
@@ -31,7 +31,7 @@ export async function exportDatabase(db: MenteDatabase): Promise<BackupFile> {
   });
 }
 
-export async function importDatabase(db: MenteDatabase, input: unknown): Promise<BackupFile> {
+export async function importDatabase(db: NovamenteDatabase, input: unknown): Promise<BackupFile> {
   const backup = parseBackup(input);
   const { notes, links, settings, views, meta } = backup.data;
 

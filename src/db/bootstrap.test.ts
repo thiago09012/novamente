@@ -3,6 +3,7 @@ import 'fake-indexeddb/auto';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { EMPTY_DOC } from '@/domain/content';
+import { defaultSettings, SETTINGS_KEY } from '@/domain/settings';
 import { makeNote } from '@/tests/factories';
 import {
   EXAMPLE_ROOT_IDS_KEY,
@@ -10,7 +11,7 @@ import {
   StorageUnavailableError,
   openAppDatabase,
 } from './bootstrap';
-import { MenteDatabase } from './database';
+import { NovamenteDatabase } from './database';
 
 const names: string[] = [];
 let unique = 0;
@@ -24,13 +25,50 @@ function nextName(): string {
 
 afterEach(async () => {
   for (const name of names.splice(0)) {
-    const db = new MenteDatabase(name);
+    const db = new NovamenteDatabase(name);
     db.close();
     await db.delete();
   }
 });
 
 describe('abertura do banco', () => {
+  it('migra notas do banco legado sem descartar conteúdo', async () => {
+    names.push('mente', 'novamente');
+    const legacy = new NovamenteDatabase('mente');
+    await legacy.open();
+    const note = makeNote({ id: 'legacy-note', title: 'Dados anteriores' });
+    await legacy.notes.put(note);
+    await legacy.links.put({ id: 'legacy-link', fromId: note.id, toId: null, toTitle: 'externa' });
+    await legacy.settings.put({ ...defaultSettings(), key: SETTINGS_KEY, theme: 'light' });
+    await legacy.views.put({
+      rootId: note.id,
+      expanded: {},
+      panX: 12,
+      panY: 34,
+      zoom: 1,
+      selectedId: note.id,
+    });
+    await legacy.meta.put({ key: 'legacy-meta', value: 'preservado' });
+    legacy.close();
+
+    const app = await openAppDatabase();
+
+    expect(app.db?.name).toBe('novamente');
+    expect(await app.repos.notes.getById(note.id)).toMatchObject({
+      id: note.id,
+      title: note.title,
+    });
+    expect(await app.repos.links.getAll()).toContainEqual({
+      id: 'legacy-link',
+      fromId: note.id,
+      toId: null,
+      toTitle: 'externa',
+    });
+    expect(await app.repos.settings.get()).toMatchObject({ theme: 'light' });
+    expect(await app.repos.views.get(note.id)).toMatchObject({ rootId: note.id, zoom: 1 });
+    expect(await app.repos.meta.get('legacy-meta')).toBe('preservado');
+  });
+
   it('cria a árvore de exemplo na primeira execução', async () => {
     const name = nextName();
     const first = await openAppDatabase(name);
@@ -92,7 +130,9 @@ describe('abertura do banco', () => {
     const remainingLinks = await reopened.repos.links.getAll();
     expect(remainingNotes.some((note) => note.id === expiredRoot.id)).toBe(false);
     expect(remainingNotes.some((note) => note.id === expiredChild.id)).toBe(false);
-    expect(remainingLinks.some((link) => link.toId === expiredRoot.id || link.fromId === expiredRoot.id)).toBe(false);
+    expect(
+      remainingLinks.some((link) => link.toId === expiredRoot.id || link.fromId === expiredRoot.id),
+    ).toBe(false);
   });
 
   it('lança StorageUnavailableError sem IndexedDB', async () => {

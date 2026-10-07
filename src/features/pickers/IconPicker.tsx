@@ -65,7 +65,7 @@ export function IconPicker({ open, current, onSelect, onClose }: IconPickerProps
               }}
               className={`flex h-11 w-11 items-center justify-center rounded-[var(--radius-sm)] border transition-colors ${
                 current === name
-                  ? 'border-accent bg-accent-bg text-on-accent'
+                  ? 'border-accent/40 bg-accent-soft text-accent'
                   : 'border-transparent text-text hover:bg-bg-hover'
               }`}
             >

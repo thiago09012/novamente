@@ -1,4 +1,4 @@
-import { isIndexedDBAvailable, MenteDatabase } from './database';
+import { isIndexedDBAvailable, NovamenteDatabase } from './database';
 import { exportDatabase, importDatabase } from './backup';
 import type { BackupFile } from '@/domain/backup';
 import type { NoteRepairResult } from '@/domain/repair';
@@ -22,7 +22,7 @@ export class StorageUnavailableError extends Error {
 }
 
 export interface AppDatabase {
-  db: MenteDatabase | null;
+  db: NovamenteDatabase | null;
   repos: Repositories;
   migration: MigrationResult;
   /** Resultado do reparo de grafos órfãos/ciclos aplicado na abertura/importação. */
@@ -35,6 +35,123 @@ export interface AppDatabase {
   importBackup: (input: unknown) => Promise<BackupFile>;
 }
 
+async function openDefaultDatabase(): Promise<NovamenteDatabase> {
+  if (typeof indexedDB.databases !== 'function') {
+    // Navegadores sem enumeração segura continuam usando o banco existente.
+    const legacy = new NovamenteDatabase('mente');
+    await legacy.open();
+    return legacy;
+  }
+
+  const databases = await indexedDB.databases();
+  const hasLegacy = databases.some((database) => database.name === 'mente');
+  const current = new NovamenteDatabase();
+  await current.open();
+  if (!hasLegacy) return current;
+
+  const migrationMarker = 'storageMigration:legacyV1';
+  if (await current.meta.get(migrationMarker)) return current;
+
+  const legacy = new NovamenteDatabase('mente');
+  await legacy.open();
+  const [oldNotes, oldLinks, oldSettings, oldViews, oldMeta, oldHandles] = await Promise.all([
+    legacy.notes.toArray(),
+    legacy.links.toArray(),
+    legacy.settings.toArray(),
+    legacy.views.toArray(),
+    legacy.meta.toArray(),
+    legacy.vaultHandles.toArray(),
+  ]);
+  const [newNotes, newLinks, newSettings, newViews, newMeta, newHandles] = await Promise.all([
+    current.notes.toArray(),
+    current.links.toArray(),
+    current.settings.toArray(),
+    current.views.toArray(),
+    current.meta.toArray(),
+    current.vaultHandles.toArray(),
+  ]);
+
+  const mergeBy = <T, K>(
+    preferred: T[],
+    incoming: T[],
+    key: (row: T) => K,
+    preferIncoming?: (current: T, candidate: T) => boolean,
+  ): T[] => {
+    const merged = new Map(preferred.map((row) => [key(row), row]));
+    for (const row of incoming) {
+      const id = key(row);
+      const existing = merged.get(id);
+      if (!existing) merged.set(id, row);
+      else if (preferIncoming?.(existing, row)) {
+        merged.set(id, row);
+      }
+    }
+    return [...merged.values()];
+  };
+
+  const notes = mergeBy(
+    newNotes,
+    oldNotes,
+    (note) => note.id,
+    (currentNote, oldNote) => oldNote.updatedAt > currentNote.updatedAt,
+  );
+  const links = mergeBy(newLinks, oldLinks, (link) => link.id);
+  const settings = mergeBy(newSettings, oldSettings, (row) => row.key);
+  const views = mergeBy(newViews, oldViews, (view) => view.rootId);
+  const meta = mergeBy(newMeta, oldMeta, (row) => row.key);
+  if (!meta.some((row) => row.key === migrationMarker)) {
+    meta.push({ key: migrationMarker, value: { completedAt: Date.now() } });
+  }
+  const handles = mergeBy(newHandles, oldHandles, (row) => row.id);
+
+  await current.transaction(
+    'rw',
+    [
+      current.notes,
+      current.links,
+      current.settings,
+      current.views,
+      current.meta,
+      current.vaultHandles,
+    ],
+    async () => {
+      await Promise.all([
+        current.notes.bulkPut(notes),
+        current.links.bulkPut(links),
+        current.settings.bulkPut(settings),
+        current.views.bulkPut(views),
+        current.meta.bulkPut(meta),
+        current.vaultHandles.bulkPut(handles),
+      ]);
+    },
+  );
+
+  const copiedCounts = await Promise.all([
+    current.notes.count(),
+    current.links.count(),
+    current.settings.count(),
+    current.views.count(),
+    current.meta.count(),
+    current.vaultHandles.count(),
+  ]);
+  const expectedCounts = [
+    notes.length,
+    links.length,
+    settings.length,
+    views.length,
+    meta.length,
+    handles.length,
+  ];
+  if (copiedCounts.some((count, index) => count !== expectedCounts[index])) {
+    legacy.close();
+    current.close();
+    throw new Error('Não foi possível confirmar a migração dos dados locais para Novamente.');
+  }
+
+  legacy.close();
+  return current;
+}
+
 /**
  * Abre o banco, aplica migrações e cria a árvore de exemplo na primeira execução.
  * Nunca apaga dados existentes.
@@ -44,9 +161,9 @@ export async function openAppDatabase(name?: string): Promise<AppDatabase> {
     throw new StorageUnavailableError();
   }
 
-  const db = new MenteDatabase(name);
+  const db = name ? new NovamenteDatabase(name) : await openDefaultDatabase();
   try {
-    await db.open();
+    if (name) await db.open();
   } catch (error) {
     db.close();
     if (
@@ -112,7 +229,7 @@ export async function openAppDatabase(name?: string): Promise<AppDatabase> {
   };
 }
 
-async function purgeExpiredTrash(db: MenteDatabase): Promise<void> {
+async function purgeExpiredTrash(db: NovamenteDatabase): Promise<void> {
   const notes = await db.notes.toArray();
   const expiredIds = expiredTrashIds(notes, Date.now());
   if (expiredIds.length === 0) return;

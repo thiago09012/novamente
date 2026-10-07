@@ -8,18 +8,23 @@ export interface CanvasEdgesProps {
   linkEdges?: readonly LayoutEdge[];
   /** Ids dos nós cujo caminho raiz→atual deve ser realçado. */
   highlight: ReadonlySet<ID>;
+  /** Nó selecionado: arestas que o tocam disparam a "sinapse" (glow + fluxo). */
+  selectedId?: ID | null;
   width: number;
   height: number;
 }
 
 /**
- * Arestas hierárquicas em um único `<svg>` (Bézier pai→filho).
- * O caminho da raiz até o nó atual ganha destaque (§5.3 Arestas).
+ * Arestas do grafo em um único `<svg>` — o elemento-assinatura da identidade.
+ * Hierarquia: 1px sólida sutil. Wikilinks: 1.2px tracejados azuis. Aresta que
+ * toca o nó selecionado: 1.8px com glow e animação de fluxo (desligada com
+ * movimento reduzido via `.edge-flow`).
  */
 export const CanvasEdges = memo(function CanvasEdges({
   edges,
   linkEdges = [],
   highlight,
+  selectedId = null,
   width,
   height,
 }: CanvasEdgesProps) {
@@ -38,14 +43,16 @@ export const CanvasEdges = memo(function CanvasEdges({
             key={edge.id}
             d={`M ${edge.x1} ${edge.y1} C ${midX} ${edge.y1}, ${midX} ${edge.y2}, ${edge.x2} ${edge.y2}`}
             fill="none"
-            stroke={active ? 'var(--accent)' : 'var(--border-strong)'}
-            strokeWidth={active ? 2.5 : 1.5}
-            strokeOpacity={active ? 1 : 0.55}
+            stroke={active ? 'var(--accent)' : 'var(--edge-tree)'}
+            strokeWidth={active ? 1.8 : 1}
             strokeLinecap="round"
           />
         );
       })}
       {linkEdges.map((edge) => {
+        const active =
+          selectedId !== null &&
+          (edge.childId === selectedId || edge.fromId === selectedId);
         const midX = (edge.x1 + edge.x2) / 2;
         return (
           <path
@@ -53,11 +60,14 @@ export const CanvasEdges = memo(function CanvasEdges({
             data-testid="wikilink-edge"
             d={`M ${edge.x1} ${edge.y1} C ${midX} ${edge.y1}, ${midX} ${edge.y2}, ${edge.x2} ${edge.y2}`}
             fill="none"
-            stroke="var(--accent)"
-            strokeWidth={1.5}
-            strokeDasharray="5 4"
-            strokeOpacity={0.7}
+            stroke={active ? 'var(--accent)' : 'var(--edge-link)'}
+            strokeWidth={active ? 1.8 : 1.2}
+            strokeDasharray={active ? '4 5' : '3 5'}
             strokeLinecap="round"
+            className={active ? 'edge-flow' : undefined}
+            style={
+              active ? { filter: 'drop-shadow(0 0 8px var(--glow))' } : undefined
+            }
           />
         );
       })}

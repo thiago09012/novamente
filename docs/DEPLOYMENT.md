@@ -1,11 +1,11 @@
-# Publicação do Neuronow: GitHub, Vercel e Supabase
+# Publicação do Novamente: GitHub, Vercel e Supabase
 
 ## Estado
 
 - **Vercel** serve a aplicação Vite como SPA; `vercel.json` direciona rotas ao
   `index.html`.
 - **GitHub** guarda o código-fonte no repositório `thiago09012/novamente`.
-- **Supabase** oferece login e uma cópia JSON privada por usuário. O Neuronow
+- **Supabase** oferece login e uma cópia JSON privada por usuário. O Novamente
   continua salvando primeiro no IndexedDB. Envio e restauração são manuais;
   ainda não há sincronização em tempo real entre dispositivos.
 - Não coloque `service_role` em variáveis `VITE_*`, no navegador ou no Git.
@@ -14,7 +14,10 @@
 ## 1. Criar o projeto Supabase
 
 1. Crie um projeto Supabase e guarde a senha do banco em um gerenciador seguro.
-2. No SQL Editor, execute `supabase/migrations/20261006000000_create_mente_backups.sql`.
+2. Aplique as migrations em `supabase/migrations` em ordem. A primeira cria a
+   tabela legada; a migration `20261007000000_rename_project_to_novamente.sql`
+   renomeia a tabela sem apagar as cópias salvas e mantém compatibilidade com
+   backups antigos.
 3. Em Authentication → URL Configuration, configure o Site URL para o domínio
    principal da Vercel e adicione como Redirect URLs o domínio de produção,
    seus domínios de preview usados para teste e `http://localhost:5173/**`.
@@ -37,8 +40,9 @@ dados locais; exporte um JSON antes dessa operação.
 
 ## 3. Publicar o código
 
-1. Crie um repositório GitHub **privado** para começar e envie o código sem
-   `.env.local`, backups, nem `mente-vault/`.
+1. Use o repositório público existente `thiago09012/novamente`. Antes de
+   publicar alterações, confirme que `.env.local`, backups e `novamente-vault/`
+   continuam fora do Git.
 2. Importe o repositório no Vercel. Configure framework Vite, build command
    `npm run build` e output directory `dist`.
 3. Em Vercel → Settings → Environment Variables, defina
@@ -53,7 +57,7 @@ gerar previews quando o repositório estiver conectado ao Vercel.
 ## Limites do modelo atual
 
 - A nuvem recebe o backup integral (notas, configurações, visualizações e
-  lixeira) como JSON na tabela `mente_backups`, uma linha por usuário.
+  lixeira) como JSON na tabela `novamente_backups`, uma linha por usuário.
 - RLS limita as operações ao `auth.uid()` do usuário conectado. Ainda assim,
   o conteúdo enviado fica legível no projeto Supabase para administradores;
   este fluxo não oferece criptografia ponta a ponta.

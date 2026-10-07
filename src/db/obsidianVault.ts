@@ -9,7 +9,7 @@ import {
 import { noteToMarkdown } from '@/domain/markdown';
 
 import type { AppDatabase } from './bootstrap';
-import type { MenteDatabase } from './database';
+import type { NovamenteDatabase } from './database';
 import type { Note } from '@/domain/types';
 import { setMarkdownVaultWriteHandler } from './markdownVaultWriteGate';
 import { t } from '@/i18n';
@@ -29,10 +29,11 @@ interface DirectoryPickerWindow extends Window {
 }
 
 const HANDLE_ID = 'obsidian';
-const SYNC_STATE_PATH = '.mente/sync-state.json';
+const SYNC_STATE_PATH = '.novamente/sync-state.json';
+const LEGACY_SYNC_STATE_PATH = '.mente/sync-state.json';
 
 interface SyncState {
-  format: 'neuronow-markdown-sync';
+  format: 'novamente-markdown-sync';
   version: 1;
   notes: Record<string, { app: string; markdown: string; path: string }>;
 }
@@ -44,11 +45,11 @@ export function canUseMarkdownVault(): boolean {
 export async function chooseMarkdownVault(): Promise<DirectoryHandleWithAccess> {
   const picker = (window as DirectoryPickerWindow).showDirectoryPicker;
   if (!picker) throw new Error('Este navegador não permite conectar uma pasta Markdown.');
-  return picker.call(window, { id: 'neuronow-obsidian-vault', mode: 'readwrite' });
+  return picker.call(window, { id: 'novamente-obsidian-vault', mode: 'readwrite' });
 }
 
 export async function saveMarkdownVaultHandle(
-  db: MenteDatabase,
+  db: NovamenteDatabase,
   handle: DirectoryHandleWithAccess,
 ): Promise<void> {
   setMarkdownVaultWriteHandler(null);
@@ -56,7 +57,7 @@ export async function saveMarkdownVaultHandle(
 }
 
 export async function loadMarkdownVaultHandle(
-  db: MenteDatabase,
+  db: NovamenteDatabase,
 ): Promise<DirectoryHandleWithAccess | null> {
   const row = await db.vaultHandles.get(HANDLE_ID);
   return row?.handle ? (row.handle as DirectoryHandleWithAccess) : null;
@@ -85,7 +86,7 @@ async function collectMarkdown(
 ): Promise<MarkdownFile[]> {
   const files: MarkdownFile[] = [];
   for await (const entry of directory.values()) {
-    if (!prefix && entry.name === '.mente') continue;
+    if (!prefix && (entry.name === '.novamente' || entry.name === '.mente')) continue;
     if (entry.kind === 'directory') {
       files.push(
         ...(await collectMarkdown(entry as DirectoryHandleWithAccess, `${prefix}${entry.name}/`)),
@@ -141,39 +142,47 @@ async function writeManagedFile(
 }
 
 async function readSyncState(directory: DirectoryHandleWithAccess): Promise<SyncState | null> {
-  try {
-    const metadata = (await directory.getDirectoryHandle('.mente')) as DirectoryHandleWithAccess;
-    const fileHandle = await metadata.getFileHandle('sync-state.json');
-    const file = await fileHandle.getFile();
-    const raw: unknown = JSON.parse(await file.text());
-    if (
-      typeof raw !== 'object' ||
-      raw === null ||
-      (raw as Record<string, unknown>).format !== 'neuronow-markdown-sync' ||
-      (raw as Record<string, unknown>).version !== 1 ||
-      typeof (raw as Record<string, unknown>).notes !== 'object' ||
-      (raw as Record<string, unknown>).notes === null ||
-      Array.isArray((raw as Record<string, unknown>).notes)
-    ) {
-      return null;
-    }
-    const rawNotes = (raw as Record<string, unknown>).notes as Record<string, unknown>;
-    const notes: SyncState['notes'] = {};
-    for (const [id, value] of Object.entries(rawNotes)) {
+  for (const path of [SYNC_STATE_PATH, LEGACY_SYNC_STATE_PATH]) {
+    try {
+      const [directoryName, fileName] = path.split('/');
+      const metadata = (await directory.getDirectoryHandle(
+        directoryName,
+      )) as DirectoryHandleWithAccess;
+      const fileHandle = await metadata.getFileHandle(fileName);
+      const file = await fileHandle.getFile();
+      const raw: unknown = JSON.parse(await file.text());
       if (
-        typeof value === 'object' &&
-        value !== null &&
-        typeof (value as Record<string, unknown>).app === 'string' &&
-        typeof (value as Record<string, unknown>).markdown === 'string' &&
-        typeof (value as Record<string, unknown>).path === 'string'
+        typeof raw !== 'object' ||
+        raw === null ||
+      !['novamente-markdown-sync', 'neuronow-markdown-sync', 'mente-markdown-sync'].includes(
+          String((raw as Record<string, unknown>).format),
+        ) ||
+        (raw as Record<string, unknown>).version !== 1 ||
+        typeof (raw as Record<string, unknown>).notes !== 'object' ||
+        (raw as Record<string, unknown>).notes === null ||
+        Array.isArray((raw as Record<string, unknown>).notes)
       ) {
-        notes[id] = value as SyncState['notes'][string];
+        return null;
       }
+      const rawNotes = (raw as Record<string, unknown>).notes as Record<string, unknown>;
+      const notes: SyncState['notes'] = {};
+      for (const [id, value] of Object.entries(rawNotes)) {
+        if (
+          typeof value === 'object' &&
+          value !== null &&
+          typeof (value as Record<string, unknown>).app === 'string' &&
+          typeof (value as Record<string, unknown>).markdown === 'string' &&
+          typeof (value as Record<string, unknown>).path === 'string'
+        ) {
+          notes[id] = value as SyncState['notes'][string];
+        }
+      }
+      return { format: 'novamente-markdown-sync', version: 1, notes };
+    } catch {
+      // Tenta o caminho legado antes de tratar o vault como primeira sincronização.
     }
-    return { format: 'neuronow-markdown-sync', version: 1, notes };
-  } catch {
-    return null;
   }
+  return null;
 }
 
 async function noteSignature(note: Parameters<typeof noteToMarkdown>[0]): Promise<string> {
@@ -197,7 +206,7 @@ async function persistSyncState(
   changedIds?: ReadonlySet<string>,
 ): Promise<void> {
   const currentState = (await readSyncState(directory)) ?? {
-    format: 'neuronow-markdown-sync' as const,
+    format: 'novamente-markdown-sync' as const,
     version: 1 as const,
     notes: {},
   };
@@ -222,7 +231,7 @@ async function persistSyncState(
     };
   }
   const state: SyncState = {
-    format: 'neuronow-markdown-sync',
+    format: 'novamente-markdown-sync',
     version: 1,
     notes: stateNotes,
   };
@@ -327,26 +336,36 @@ async function writeVault(
   const previousPaths = await (async () => {
     try {
       const manifestDirectory = (await directory.getDirectoryHandle(
-        '.mente',
+        '.novamente',
       )) as DirectoryHandleWithAccess;
       const manifestHandle = await manifestDirectory.getFileHandle('manifest.json');
       const manifestFile = await manifestHandle.getFile();
       const parsed: unknown = JSON.parse(await manifestFile.text());
       return parseManifest(parsed).notes.map((note) => note.path);
     } catch {
-      return (await collectMarkdown(directory)).map((file) => file.path);
+      try {
+        const legacyDirectory = (await directory.getDirectoryHandle(
+          '.mente',
+        )) as DirectoryHandleWithAccess;
+        const legacyHandle = await legacyDirectory.getFileHandle('manifest.json');
+        const legacyFile = await legacyHandle.getFile();
+        const parsed: unknown = JSON.parse(await legacyFile.text());
+        return parseManifest(parsed).notes.map((note) => note.path);
+      } catch {
+        return (await collectMarkdown(directory)).map((file) => file.path);
+      }
     }
   })();
 
   const { files } = exportVault(notes);
   const nextNotePaths = new Set(
-    files.filter((file) => !file.path.startsWith('.mente/')).map((file) => file.path),
+    files.filter((file) => !file.path.startsWith('.novamente/')).map((file) => file.path),
   );
-  for (const file of files.filter((item) => !item.path.startsWith('.mente/'))) {
+  for (const file of files.filter((item) => !item.path.startsWith('.novamente/'))) {
     await writeManagedFile(directory, file.path, file.markdown);
   }
   await removeObsoleteManagedFiles(directory, previousPaths, nextNotePaths);
-  for (const file of files.filter((item) => item.path.startsWith('.mente/'))) {
+  for (const file of files.filter((item) => item.path.startsWith('.novamente/'))) {
     await writeManagedFile(directory, file.path, file.markdown);
   }
 }
@@ -413,8 +432,8 @@ export async function synchronizeMarkdownVault(app: AppDatabase): Promise<{
   const conflictTimestamp = Date.now();
   for (const [index, conflict] of conflicts.entries()) {
     const conflictId = `${conflict.app.id}-${conflictTimestamp}-${index + 1}`;
-    const appPath = `.mente/conflicts/${conflictId}-app.md`;
-    const markdownPath = `.mente/conflicts/${conflictId}-markdown.md`;
+    const appPath = `.novamente/conflicts/${conflictId}-app.md`;
+    const markdownPath = `.novamente/conflicts/${conflictId}-markdown.md`;
     await writeManagedFile(handle, appPath, noteToMarkdown(conflict.app));
     await writeManagedFile(handle, markdownPath, noteToMarkdown(conflict.markdown));
     conflictCopies.push(
@@ -444,7 +463,7 @@ export async function synchronizeMarkdownVault(app: AppDatabase): Promise<{
     ...(conflictCopies.length > 0 ? conflictCopies : ['Nenhum.']),
     '',
   ].join('\n');
-  await writeManagedFile(handle, '.mente/review.md', review);
+  await writeManagedFile(handle, '.novamente/review.md', review);
   setMarkdownVaultWriteHandler((upsert, remove) =>
     persistPrimaryMutation(app, handle, upsert, remove),
   );

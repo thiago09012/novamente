@@ -22,7 +22,7 @@ critical data-loss or data-exposure issues are prioritized.
 
 ## Scope notes
 
-Neuronow is local-first: notes live in the browser's IndexedDB and optional
+Novamente is local-first: notes live in the browser's IndexedDB and optional
 Markdown folders/Supabase copies chosen by the user. Reports about the demo
 deployment breaking its own sandbox are welcome; reports that require the
 victim to paste secrets into notes are not in scope (never put secrets in

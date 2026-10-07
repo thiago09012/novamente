@@ -1,19 +1,19 @@
 import 'fake-indexeddb/auto';
 
-import { createBackup } from '@/domain/backup';
+import { createBackup, parseBackup } from '@/domain/backup';
 import { EMPTY_DOC } from '@/domain/content';
 import { SETTINGS_KEY, defaultSettings } from '@/domain/settings';
 import type { NoteContentNode } from '@/domain/types';
 import { makeNote } from '@/tests/factories';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { MenteDatabase } from './database';
+import { NovamenteDatabase } from './database';
 import { exportDatabase, importDatabase } from './backup';
 
-const databases: MenteDatabase[] = [];
+const databases: NovamenteDatabase[] = [];
 
-async function openDatabase(): Promise<MenteDatabase> {
-  const db = new MenteDatabase(`backup-${Date.now()}-${databases.length}`);
+async function openDatabase(): Promise<NovamenteDatabase> {
+  const db = new NovamenteDatabase(`backup-${Date.now()}-${databases.length}`);
   databases.push(db);
   await db.open();
   return db;
@@ -27,6 +27,18 @@ afterEach(async () => {
 });
 
 describe('backup JSON', () => {
+  it('importa o formato legado e o normaliza para Novamente', () => {
+    const legacy = createBackup({
+      notes: [],
+      links: [],
+      settings: defaultSettings(),
+      views: [],
+      meta: [],
+    });
+
+    expect(parseBackup({ ...legacy, format: 'mente-backup' }).format).toBe('novamente-backup');
+  });
+
   it('exporta e restaura integralmente notas, links, settings, views e meta', async () => {
     const db = await openDatabase();
     const root = makeNote({ id: 'root', title: 'Categoria', orderKey: 'a0' });

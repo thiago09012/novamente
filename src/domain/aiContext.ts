@@ -18,7 +18,7 @@ export function exportProjectContext(
   const projectNotes = [root, ...getDescendants(index, rootId)].filter(isAlive);
   const projectIds = new Set(projectNotes.map((note) => note.id));
   const lines = [
-    `# Neuronow — contexto do projeto: ${root.title || 'Sem título'}`,
+    `# Novamente — contexto do projeto: ${root.title || 'Sem título'}`,
     '',
     `Exportado em: ${new Date(exportedAt).toISOString()}`,
     `Notas incluídas: ${projectNotes.length}`,

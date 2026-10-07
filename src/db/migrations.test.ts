@@ -3,13 +3,13 @@ import 'fake-indexeddb/auto';
 import { SETTINGS_KEY, defaultSettings } from '@/domain/settings';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { MenteDatabase } from './database';
+import { NovamenteDatabase } from './database';
 import { applyDataMigrations } from './migrations';
 
-const open: MenteDatabase[] = [];
+const open: NovamenteDatabase[] = [];
 
-function freshDb(): MenteDatabase {
-  const db = new MenteDatabase(`mig-${Date.now()}-${open.length}`);
+function freshDb(): NovamenteDatabase {
+  const db = new NovamenteDatabase(`mig-${Date.now()}-${open.length}`);
   open.push(db);
   return db;
 }

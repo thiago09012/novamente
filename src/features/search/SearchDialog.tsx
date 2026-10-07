@@ -25,14 +25,14 @@ function normalizeTerm(term: string): string {
 function measureSearchPhase<T>(name: string, action: () => T): T {
   let enabled = false;
   try {
-    enabled = typeof window !== 'undefined' && window.sessionStorage.getItem('mente-perf-phases') === '1';
+    enabled = typeof window !== 'undefined' && window.sessionStorage.getItem('novamente-perf-phases') === '1';
   } catch {
     // A medição é opcional e não deve afetar o fluxo de busca.
   }
   if (!enabled) return action();
   const start = performance.now();
   const result = action();
-  performance.measure(`mente:${name}`, { start, end: performance.now() });
+  performance.measure(`novamente:${name}`, { start, end: performance.now() });
   return result;
 }
 

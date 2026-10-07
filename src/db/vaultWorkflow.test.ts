@@ -5,12 +5,12 @@ import { makeNote } from '@/tests/factories';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { importDatabase } from './backup';
-import { MenteDatabase } from './database';
+import { NovamenteDatabase } from './database';
 
-const databases: MenteDatabase[] = [];
+const databases: NovamenteDatabase[] = [];
 
-async function openDatabase(): Promise<MenteDatabase> {
-  const db = new MenteDatabase(`vault-flow-${Date.now()}-${databases.length}`);
+async function openDatabase(): Promise<NovamenteDatabase> {
+  const db = new NovamenteDatabase(`vault-flow-${Date.now()}-${databases.length}`);
   databases.push(db);
   await db.open();
   return db;
@@ -25,7 +25,7 @@ afterEach(async () => {
 
 function sampleGraph() {
   const projs = makeNote({ id: 'cat-projs', parentId: null, title: 'Projetos', orderKey: 'a0' });
-  const app = makeNote({ id: 'note-app', parentId: 'cat-projs', title: 'App Mente', orderKey: 'a0' });
+  const app = makeNote({ id: 'note-app', parentId: 'cat-projs', title: 'App Novamente', orderKey: 'a0' });
   const pwa = makeNote({
     id: 'note-pwa',
     parentId: 'note-app',
@@ -39,12 +39,12 @@ function sampleGraph() {
           type: 'paragraph',
           content: [
             { type: 'text', text: 'Ver ' },
-            { type: 'wikilink', attrs: { noteId: 'note-app', title: 'App Mente', sourceId: 'note-pwa' } },
+            { type: 'wikilink', attrs: { noteId: 'note-app', title: 'App Novamente', sourceId: 'note-pwa' } },
           ],
         },
       ],
     },
-    contentText: 'Ver App Mente',
+    contentText: 'Ver App Novamente',
   });
   return [projs, app, pwa];
 }
@@ -64,7 +64,7 @@ describe('fluxo da IA (vault → merge → importDatabase)', () => {
       '',
       '# Fase 7 PWA',
       '',
-      'Ver [[App Mente]] agora — texto novo da IA.',
+      'Ver [[App Novamente]] agora — texto novo da IA.',
     ].join('\n');
     const iaFiles = files.map((file) =>
       file === target ? { ...file, markdown: iaMarkdown } : file,

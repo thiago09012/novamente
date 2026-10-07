@@ -6,7 +6,14 @@ import { Menu, type MenuItem } from '@/components/ui/Menu';
 import { ColorPicker } from '@/features/pickers/ColorPicker';
 import { IconPicker } from '@/features/pickers/IconPicker';
 import { CULLING_MARGIN, DENSITY_NODE_PX, ZOOM_LEGIBLE_MIN } from '@/domain/constants';
-import { buildIndex, countDescendants, depthOf, getDescendants, getPath, isAlive } from '@/domain/tree';
+import {
+  buildIndex,
+  countDescendants,
+  depthOf,
+  getDescendants,
+  getPath,
+  isAlive,
+} from '@/domain/tree';
 import type { ID, Note } from '@/domain/types';
 import { t } from '@/i18n';
 import { CATEGORY_PARENT_KEY, useNotesStore } from '@/store/notesStore';
@@ -93,14 +100,16 @@ function escapeAttr(value: string): string {
 function measureCanvasPhase<T>(name: string, action: () => T): T {
   let enabled = false;
   try {
-    enabled = typeof window !== 'undefined' && window.sessionStorage.getItem('mente-perf-phases') === '1';
+    enabled =
+      typeof window !== 'undefined' &&
+      window.sessionStorage.getItem('novamente-perf-phases') === '1';
   } catch {
     // O profiling é opcional; falha de sessionStorage não afeta o canvas.
   }
   if (!enabled) return action();
   const start = performance.now();
   const result = action();
-  performance.measure(`mente:${name}`, { start, end: performance.now() });
+  performance.measure(`novamente:${name}`, { start, end: performance.now() });
   return result;
 }
 
@@ -136,6 +145,8 @@ export function Canvas({
   const [picker, setPicker] = useState<PickerState | null>(null);
   const [viewportSize, setViewportSize] = useState({ w: 0, h: 0 });
   const [selectionRect, setSelectionRect] = useState<WorldRect | null>(null);
+  /** Pan em andamento: o cursor vira mão fechada (grabbing). */
+  const [panning, setPanning] = useState(false);
   const [touchDragPreview, setTouchDragPreview] = useState<TouchDragPreview | null>(null);
   const [bulkTag, setBulkTag] = useState('');
   const [bulkTargetCategoryId, setBulkTargetCategoryId] = useState('');
@@ -246,10 +257,9 @@ export function Canvas({
 
   // Compartilha o layout com as linhas da sidebar.
   useLayoutEffect(() => {
-    useLayoutStore.getState().setLayout(
-      layoutNodeById,
-      rootId ? (focusLayout.childIds[rootId] ?? []) : [],
-    );
+    useLayoutStore
+      .getState()
+      .setLayout(layoutNodeById, rootId ? (focusLayout.childIds[rootId] ?? []) : []);
   }, [layoutNodeById, focusLayout.childIds, rootId]);
 
   // View da categoria ativa (primeira visita lê do banco).
@@ -346,7 +356,8 @@ export function Canvas({
       for (const ancestor of path.slice(1, -1)) expanded[ancestor.id] = true;
       useSettingsStore.getState().setActiveCategory(category.id);
       useViewStore.getState().patch(category.id, { expanded, selectedId: target.id });
-      centerOnNextId.current = target.id === category.id ? null : { rootId: category.id, id: target.id };
+      centerOnNextId.current =
+        target.id === category.id ? null : { rootId: category.id, id: target.id };
       useUiStore.getState().clearNavigationRequest();
     })();
     return () => {
@@ -391,13 +402,17 @@ export function Canvas({
           const siblings = byParent.get(target.parentId) ?? [];
           const from = siblings.findIndex((item) => item.id === anchor.id);
           const to = siblings.findIndex((item) => item.id === target.id);
-          const range = siblings.slice(Math.min(from, to), Math.max(from, to) + 1).map((item) => item.id);
+          const range = siblings
+            .slice(Math.min(from, to), Math.max(from, to) + 1)
+            .map((item) => item.id);
           ui.setSelectedNodeIds(range);
         } else {
           ui.setSelectedNodeIds([id]);
         }
       } else if (modifiers.ctrlKey || modifiers.metaKey) {
-        const selected = new Set(ui.selectedNodeIds.length ? ui.selectedNodeIds : [current.selectedId ?? id]);
+        const selected = new Set(
+          ui.selectedNodeIds.length ? ui.selectedNodeIds : [current.selectedId ?? id],
+        );
         if (selected.has(id)) selected.delete(id);
         else selected.add(id);
         ui.setSelectedNodeIds([...selected]);
@@ -512,10 +527,13 @@ export function Canvas({
     [createChild],
   );
 
-  const startRename = useCallback((id: ID) => {
-    useUiStore.getState().startRename(id);
-    select(id);
-  }, [select]);
+  const startRename = useCallback(
+    (id: ID) => {
+      useUiStore.getState().startRename(id);
+      select(id);
+    },
+    [select],
+  );
 
   const finishRename = useCallback(() => {
     useUiStore.getState().startRename(null);
@@ -755,21 +773,25 @@ export function Canvas({
     }
   }, []);
 
-  const handleCanvasDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
-    if (!Array.from(event.dataTransfer.types).includes('application/x-mente-note')) return;
-    if (!(event.target instanceof Element && event.target.closest('[data-node-id]'))) {
-      event.preventDefault();
-      event.dataTransfer.dropEffect = 'none';
-    }
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    const rect = viewport.getBoundingClientRect();
-    startAutoPan(event.clientX - rect.left, event.clientY - rect.top);
-  }, [startAutoPan]);
+  const handleCanvasDragOver = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      if (!Array.from(event.dataTransfer.types).includes('application/x-novamente-note')) return;
+      if (!(event.target instanceof Element && event.target.closest('[data-node-id]'))) {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'none';
+      }
+      const viewport = viewportRef.current;
+      if (!viewport) return;
+      const rect = viewport.getBoundingClientRect();
+      startAutoPan(event.clientX - rect.left, event.clientY - rect.top);
+    },
+    [startAutoPan],
+  );
 
   useEffect(() => {
     const updateAutoPan = (event: DragEvent) => {
-      if (!Array.from(event.dataTransfer?.types ?? []).includes('application/x-mente-note')) return;
+      if (!Array.from(event.dataTransfer?.types ?? []).includes('application/x-novamente-note'))
+        return;
       const viewport = viewportRef.current;
       if (!viewport) return;
       const rect = viewport.getBoundingClientRect();
@@ -793,23 +815,20 @@ export function Canvas({
     [],
   );
 
-  const zoomAt = useCallback(
-    (centerX: number, centerY: number, nextZoomRaw: number) => {
-      const root = currentRootId();
-      if (!root) return;
-      const viewState = currentView(root);
-      const nextZoom = clampZoom(nextZoomRaw);
-      if (nextZoom === viewState.zoom) return;
-      const worldX = (centerX - viewState.panX) / viewState.zoom;
-      const worldY = (centerY - viewState.panY) / viewState.zoom;
-      useViewStore.getState().patch(root, {
-        zoom: nextZoom,
-        panX: centerX - worldX * nextZoom,
-        panY: centerY - worldY * nextZoom,
-      });
-    },
-    [],
-  );
+  const zoomAt = useCallback((centerX: number, centerY: number, nextZoomRaw: number) => {
+    const root = currentRootId();
+    if (!root) return;
+    const viewState = currentView(root);
+    const nextZoom = clampZoom(nextZoomRaw);
+    if (nextZoom === viewState.zoom) return;
+    const worldX = (centerX - viewState.panX) / viewState.zoom;
+    const worldY = (centerY - viewState.panY) / viewState.zoom;
+    useViewStore.getState().patch(root, {
+      zoom: nextZoom,
+      panX: centerX - worldX * nextZoom,
+      panY: centerY - worldY * nextZoom,
+    });
+  }, []);
 
   const zoomBy = useCallback(
     (factor: number) => {
@@ -827,89 +846,91 @@ export function Canvas({
     [rootId],
   );
 
-  const onPointerDown = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      const target = event.target as HTMLElement;
-      if (event.pointerType === 'mouse' && event.button !== 0) return;
-      if (target.closest('button, input')) return;
-      const element = event.currentTarget;
+  const onPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement;
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    if (target.closest('button, input')) return;
+    const element = event.currentTarget;
 
-      const node = target.closest<HTMLElement>('[data-node-id]');
-      if (event.pointerType === 'touch' && node?.dataset.nodeId) {
-        const pending: TouchDragState = {
-          pointerId: event.pointerId,
-          sourceId: node.dataset.nodeId,
-          startX: event.clientX,
-          startY: event.clientY,
-          x: event.clientX,
-          y: event.clientY,
-          active: false,
-          timer: null,
-          targetId: null,
-          position: null,
-        };
-        touchDrag.current = pending;
-        pending.timer = window.setTimeout(() => {
-          if (touchDrag.current !== pending) return;
-          pending.active = true;
-          try {
-            element.setPointerCapture(event.pointerId);
-          } catch {
-            // captura indisponível: continua com os eventos dentro do viewport
-          }
-          setTouchDragPreview({ sourceId: pending.sourceId, x: pending.x, y: pending.y, targetId: null });
-        }, TOUCH_DRAG_HOLD_MS);
-        return;
-      }
-
-      if (node) return;
-      pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-      const root = currentRootId();
-      if (root) useViewStore.getState().cancelAnimation(root);
-
-      if (pointers.current.size === 2) {
-        panDrag.current = null;
-        selectionDrag.current = null;
-        setSelectionRect(null);
-        const [a, b] = [...pointers.current.values()];
-        pinch.current = { dist: Math.hypot(a.x - b.x, a.y - b.y) };
-        return;
-      }
-
-      try {
-        element.setPointerCapture(event.pointerId);
-      } catch {
-        // captura indisponível: eventos continuam chegando enquanto o ponteiro vive
-      }
-      if (event.shiftKey) {
-        const rect = element.getBoundingClientRect();
-        const startX = event.clientX - rect.left;
-        const startY = event.clientY - rect.top;
-        selectionDrag.current = {
-          pointerId: event.pointerId,
-          startX,
-          startY,
-          currentX: startX,
-          currentY: startY,
-          moved: false,
-        };
-        panDrag.current = null;
-        setSelectionRect({ x: startX, y: startY, width: 0, height: 0 });
-        return;
-      }
-
-      const viewState = currentView(root);
-      panDrag.current = {
+    const node = target.closest<HTMLElement>('[data-node-id]');
+    if (event.pointerType === 'touch' && node?.dataset.nodeId) {
+      const pending: TouchDragState = {
         pointerId: event.pointerId,
+        sourceId: node.dataset.nodeId,
         startX: event.clientX,
         startY: event.clientY,
-        originX: viewState.panX,
-        originY: viewState.panY,
+        x: event.clientX,
+        y: event.clientY,
+        active: false,
+        timer: null,
+        targetId: null,
+        position: null,
+      };
+      touchDrag.current = pending;
+      pending.timer = window.setTimeout(() => {
+        if (touchDrag.current !== pending) return;
+        pending.active = true;
+        try {
+          element.setPointerCapture(event.pointerId);
+        } catch {
+          // captura indisponível: continua com os eventos dentro do viewport
+        }
+        setTouchDragPreview({
+          sourceId: pending.sourceId,
+          x: pending.x,
+          y: pending.y,
+          targetId: null,
+        });
+      }, TOUCH_DRAG_HOLD_MS);
+      return;
+    }
+
+    if (node) return;
+    pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    const root = currentRootId();
+    if (root) useViewStore.getState().cancelAnimation(root);
+
+    if (pointers.current.size === 2) {
+      panDrag.current = null;
+      selectionDrag.current = null;
+      setSelectionRect(null);
+      const [a, b] = [...pointers.current.values()];
+      pinch.current = { dist: Math.hypot(a.x - b.x, a.y - b.y) };
+      return;
+    }
+
+    try {
+      element.setPointerCapture(event.pointerId);
+    } catch {
+      // captura indisponível: eventos continuam chegando enquanto o ponteiro vive
+    }
+    if (event.shiftKey) {
+      const rect = element.getBoundingClientRect();
+      const startX = event.clientX - rect.left;
+      const startY = event.clientY - rect.top;
+      selectionDrag.current = {
+        pointerId: event.pointerId,
+        startX,
+        startY,
+        currentX: startX,
+        currentY: startY,
         moved: false,
       };
-    },
-    [],
-  );
+      panDrag.current = null;
+      setSelectionRect({ x: startX, y: startY, width: 0, height: 0 });
+      return;
+    }
+
+    const viewState = currentView(root);
+    panDrag.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: viewState.panX,
+      originY: viewState.panY,
+      moved: false,
+    };
+  }, []);
 
   const onPointerMove = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
@@ -925,7 +946,9 @@ export function Canvas({
           return;
         }
 
-        const target = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>('[data-node-id]');
+        const target = document
+          .elementFromPoint(event.clientX, event.clientY)
+          ?.closest<HTMLElement>('[data-node-id]');
         const targetId = target?.dataset.nodeId ?? null;
         const targetRect = target?.getBoundingClientRect();
         let position: TouchDragState['position'] = null;
@@ -990,6 +1013,7 @@ export function Canvas({
       const dy = event.clientY - drag.startY;
       if (!drag.moved && Math.hypot(dx, dy) < PAN_CLICK_SLOP) return;
       drag.moved = true;
+      setPanning(true);
       schedulePan(drag.originX + dx, drag.originY + dy);
     },
     [schedulePan, startAutoPan, zoomAt],
@@ -1028,12 +1052,23 @@ export function Canvas({
         if (event.type === 'pointerup' && selection.moved) {
           const root = currentRootId();
           const viewState = currentView(root);
-          const left = (Math.min(selection.startX, selection.currentX) - viewState.panX) / viewState.zoom;
-          const top = (Math.min(selection.startY, selection.currentY) - viewState.panY) / viewState.zoom;
-          const right = (Math.max(selection.startX, selection.currentX) - viewState.panX) / viewState.zoom;
-          const bottom = (Math.max(selection.startY, selection.currentY) - viewState.panY) / viewState.zoom;
+          const left =
+            (Math.min(selection.startX, selection.currentX) - viewState.panX) / viewState.zoom;
+          const top =
+            (Math.min(selection.startY, selection.currentY) - viewState.panY) / viewState.zoom;
+          const right =
+            (Math.max(selection.startX, selection.currentX) - viewState.panX) / viewState.zoom;
+          const bottom =
+            (Math.max(selection.startY, selection.currentY) - viewState.panY) / viewState.zoom;
           const selectedIds = layout.nodes
-            .filter((node) => intersects(nodeRect(node), { x: left, y: top, width: right - left, height: bottom - top }))
+            .filter((node) =>
+              intersects(nodeRect(node), {
+                x: left,
+                y: top,
+                width: right - left,
+                height: bottom - top,
+              }),
+            )
             .map((node) => node.id);
           useUiStore.getState().setSelectedNodeIds(selectedIds);
         }
@@ -1043,6 +1078,7 @@ export function Canvas({
       const drag = panDrag.current;
       if (drag && drag.pointerId === event.pointerId) {
         panDrag.current = null;
+        setPanning(false);
         try {
           event.currentTarget.releasePointerCapture(event.pointerId);
         } catch {
@@ -1098,19 +1134,19 @@ export function Canvas({
     if (!root) return;
     const viewState = currentView(root);
     const size = viewportSize.w > 0 ? viewportSize : { w: 600, h: 400 };
-    const selected = viewState.selectedId
-      ? layoutNodeById.get(viewState.selectedId)
-      : undefined;
+    const selected = viewState.selectedId ? layoutNodeById.get(viewState.selectedId) : undefined;
     const target = selected
       ? { x: selected.x + selected.width / 2, y: selected.y + selected.height / 2 }
       : { x: layout.width / 2, y: layout.height / 2 };
-    useViewStore.getState().animatePanTo(
-      root,
-      size.w / 2 - target.x * viewState.zoom,
-      size.h / 2 - target.y * viewState.zoom,
-      DURATION_CENTER,
-      easeOut,
-    );
+    useViewStore
+      .getState()
+      .animatePanTo(
+        root,
+        size.w / 2 - target.x * viewState.zoom,
+        size.h / 2 - target.y * viewState.zoom,
+        DURATION_CENTER,
+        easeOut,
+      );
   }, [layout.height, layout.width, layoutNodeById, viewportSize]);
 
   useEffect(() => {
@@ -1203,9 +1239,10 @@ export function Canvas({
             const index = siblings.indexOf(node.id);
             const targetIndex = index + (event.key === 'ArrowDown' ? 1 : -1);
             if (index >= 0 && targetIndex >= 0 && targetIndex < siblings.length) {
-              void useNotesStore.getState().reorderNote(node.id, targetIndex).catch(() =>
-                toast(t('toast.erroSalvar'), { tone: 'error' }),
-              );
+              void useNotesStore
+                .getState()
+                .reorderNote(node.id, targetIndex)
+                .catch(() => toast(t('toast.erroSalvar'), { tone: 'error' }));
             }
             return;
           }
@@ -1248,9 +1285,10 @@ export function Canvas({
             event.preventDefault();
             const parent = byId[node.parentId];
             if (parent) {
-              void useNotesStore.getState().moveNote(node.id, parent.parentId).catch(() =>
-                toast(t('toast.erroMoverNota'), { tone: 'error' }),
-              );
+              void useNotesStore
+                .getState()
+                .moveNote(node.id, parent.parentId)
+                .catch(() => toast(t('toast.erroMoverNota'), { tone: 'error' }));
             }
             return;
           }
@@ -1294,7 +1332,9 @@ export function Canvas({
             .update({ editorOpen: true })
             .then(() => {
               window.requestAnimationFrame(() => {
-                document.querySelector<HTMLInputElement>(`[aria-label="${t('editor.tituloNota')}"]`)?.focus();
+                document
+                  .querySelector<HTMLInputElement>(`[aria-label="${t('editor.tituloNota')}"]`)
+                  ?.focus();
               });
             })
             .catch(() => toast(t('toast.erroSalvar'), { tone: 'error' }));
@@ -1458,13 +1498,12 @@ export function Canvas({
   }, [viewportSize, view.panX, view.panY, view.zoom]);
 
   const visibleNodes = useMemo(
-    () => measureCanvasPhase(
-      'culling-nodes',
-      () =>
+    () =>
+      measureCanvasPhase('culling-nodes', () =>
         viewportSize.w <= 0 || viewportSize.h <= 0
           ? []
           : layout.nodes.filter((node) => intersects(nodeRect(node), viewRect)),
-    ),
+      ),
     [layout.nodes, viewRect, viewportSize],
   );
 
@@ -1497,6 +1536,7 @@ export function Canvas({
         id: link.id,
         parentId: source.parentId,
         childId: target.id,
+        fromId: link.fromId,
         x1: source.x + source.width,
         y1: source.y + source.height / 2,
         x2: target.x,
@@ -1527,13 +1567,14 @@ export function Canvas({
   }, [layout.nodes, layoutNodeById, view.selectedId]);
 
   const pickerNote = picker?.id ? (byId[picker.id] ?? null) : null;
-  const pickerNotes = picker?.ids?.map((id) => byId[id]).filter((note): note is Note => note !== undefined) ?? [];
+  const pickerNotes =
+    picker?.ids?.map((id) => byId[id]).filter((note): note is Note => note !== undefined) ?? [];
   const pickerIds = picker?.ids ?? (picker?.id ? [picker.id] : []);
-  const pickerIcon = pickerNote?.icon ?? (
-    pickerNotes.length > 0 && pickerNotes.every((note) => note.icon === pickerNotes[0].icon)
+  const pickerIcon =
+    pickerNote?.icon ??
+    (pickerNotes.length > 0 && pickerNotes.every((note) => note.icon === pickerNotes[0].icon)
       ? pickerNotes[0].icon
-      : ''
-  );
+      : '');
   const pickerColor = pickerNote
     ? pickerNote.color
     : pickerNotes.length > 0 && pickerNotes.every((note) => note.color === pickerNotes[0].color)
@@ -1545,82 +1586,95 @@ export function Canvas({
 
   return (
     <div className="flex h-full min-w-0 flex-col bg-bg-app" data-testid="canvas">
-      {!mobileCanvas ? <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
-        {categoryAlive ? (
-          focusActive ? (
-            <nav
-              className="flex min-w-0 flex-1 items-center gap-2"
-              aria-label={t('canvas.focoRamo', {
-                nome: focusPath[focusPath.length - 1]?.title || t('common.semTitulo'),
-              })}
-              data-testid="focus-breadcrumb"
-            >
-              <Button
-                size="sm"
-                variant="ghost"
-                icon={<Icon name="arrow-left" size={12} />}
-                aria-label={t('canvas.sairFocoRamo')}
-                onClick={() => setFocus(null)}
-              >
-                {t('canvas.voltarArvore')}
-              </Button>
-              <ol className="flex min-w-0 items-center gap-1">
-                {focusPath.map((crumb, crumbIndex) => {
-                  const isCurrent = crumbIndex === focusPath.length - 1;
-                  const title = crumb.title || t('common.semTitulo');
-                  return (
-                    <li key={crumb.id} className="flex min-w-0 items-center gap-1">
-                      {crumbIndex > 0 ? (
-                        <Icon
-                          name="chevron-right"
-                          size={12}
-                          className="shrink-0 text-muted"
-                          aria-hidden="true"
-                        />
-                      ) : null}
-                      {isCurrent ? (
-                        <span
-                          aria-current="true"
-                          className="max-w-64 truncate rounded px-1.5 py-1 text-sm font-semibold text-accent"
-                          title={title}
-                        >
-                          {title}
-                        </span>
-                      ) : (
-                        <button
-                          type="button"
-                          className="max-w-64 truncate rounded px-1.5 py-1 text-sm text-muted transition-colors hover:bg-bg-hover hover:text-text"
-                          aria-label={t('canvas.focarEm', { nome: title })}
-                          title={title}
-                          onClick={() => (crumbIndex === 0 ? setFocus(null) : focusBranch(crumb.id))}
-                        >
-                          {title}
-                        </button>
-                      )}
-                    </li>
-                  );
+      {!mobileCanvas ? (
+        <header className="flex h-[52px] shrink-0 items-center gap-2 border-b border-border bg-material px-4 backdrop-blur-xl">
+          {categoryAlive ? (
+            focusActive ? (
+              <nav
+                className="flex min-w-0 flex-1 items-center gap-2"
+                aria-label={t('canvas.focoRamo', {
+                  nome: focusPath[focusPath.length - 1]?.title || t('common.semTitulo'),
                 })}
-              </ol>
-            </nav>
+                data-testid="focus-breadcrumb"
+              >
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  icon={<Icon name="arrow-left" size={12} />}
+                  aria-label={t('canvas.sairFocoRamo')}
+                  onClick={() => setFocus(null)}
+                >
+                  {t('canvas.voltarArvore')}
+                </Button>
+                <ol className="flex min-w-0 items-center gap-1">
+                  {focusPath.map((crumb, crumbIndex) => {
+                    const isCurrent = crumbIndex === focusPath.length - 1;
+                    const title = crumb.title || t('common.semTitulo');
+                    return (
+                      <li key={crumb.id} className="flex min-w-0 items-center gap-1">
+                        {crumbIndex > 0 ? (
+                          <Icon
+                            name="chevron-right"
+                            size={12}
+                            className="shrink-0 text-muted"
+                            aria-hidden="true"
+                          />
+                        ) : null}
+                        {isCurrent ? (
+                          <span
+                            aria-current="true"
+                            className="max-w-64 truncate rounded px-1.5 py-1 text-sm font-semibold text-accent"
+                            title={title}
+                          >
+                            {title}
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            className="max-w-64 truncate rounded px-1.5 py-1 text-sm text-muted transition-colors hover:bg-bg-hover hover:text-text"
+                            aria-label={t('canvas.focarEm', { nome: title })}
+                            title={title}
+                            onClick={() =>
+                              crumbIndex === 0 ? setFocus(null) : focusBranch(crumb.id)
+                            }
+                          >
+                            {title}
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ol>
+              </nav>
+            ) : (
+              <>
+                <Icon name={category.icon} size={18} className="shrink-0 text-muted" />
+                <span className="truncate text-sm font-semibold text-text">{category.title}</span>
+                <span className="ml-2 shrink-0 text-xs text-muted">
+                  {noteCount === 1
+                    ? t('canvas.umaNotaAqui')
+                    : noteCount > 1
+                      ? t('canvas.notasNaCategoria', { n: noteCount })
+                      : t('canvas.vazioTitulo')}
+                </span>
+              </>
+            )
           ) : (
-            <>
-              <Icon name={category.icon} size={18} className="shrink-0 text-muted" />
-              <span className="truncate text-sm font-semibold text-text">{category.title}</span>
-              <span className="ml-2 shrink-0 text-xs text-muted">
-                {noteCount === 1
-                  ? t('canvas.umaNotaAqui')
-                  : noteCount > 1
-                    ? t('canvas.notasNaCategoria', { n: noteCount })
-                    : t('canvas.vazioTitulo')}
-              </span>
-            </>
-          )
-        ) : (
-          <span className="truncate text-sm font-semibold text-text">
-            {t('canvas.semCategoria')}
-          </span>
-        )}
-      </header> : null}
+            <span className="truncate text-sm font-semibold text-text">
+              {t('canvas.semCategoria')}
+            </span>
+          )}
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Icon name="search" size={16} />}
+            aria-label={t('search.titulo')}
+            title={`${t('search.titulo')} (Ctrl+K)`}
+            className="ml-auto"
+            onClick={() => useUiStore.getState().openDialog('search')}
+          />
+        </header>
+      ) : null}
 
       <div
         ref={viewportRef}
@@ -1638,7 +1692,7 @@ export function Canvas({
           role="tree"
           aria-label={t('a11y.navegarArvore')}
           tabIndex={layout.nodes.length === 0 ? 0 : -1}
-          className="absolute inset-0"
+          className={`canvas-grid absolute inset-0 ${selectionRect ? 'cursor-crosshair' : panning ? 'cursor-grabbing' : 'cursor-grab'}`}
           onKeyDown={onTreeKeyDown}
         >
           <div
@@ -1654,6 +1708,7 @@ export function Canvas({
               edges={visibleEdges}
               linkEdges={visibleLinkEdges}
               highlight={highlight}
+              selectedId={view.selectedId}
               width={layout.width}
               height={layout.height}
             />
@@ -1859,7 +1914,13 @@ export function Canvas({
               void useNotesStore
                 .getState()
                 .updateNotesStyle(pickerIds, { icon })
-                .then((count) => toast(t(pickerIds.length > 1 ? 'toast.iconesAplicados' : 'toast.iconeSalvo', { n: count })))
+                .then((count) =>
+                  toast(
+                    t(pickerIds.length > 1 ? 'toast.iconesAplicados' : 'toast.iconeSalvo', {
+                      n: count,
+                    }),
+                  ),
+                )
                 .catch(() => toast(t('toast.erroSalvar'), { tone: 'error' }))
             }
           />
@@ -1871,7 +1932,13 @@ export function Canvas({
               void useNotesStore
                 .getState()
                 .updateNotesStyle(pickerIds, { color })
-                .then((count) => toast(t(pickerIds.length > 1 ? 'toast.coresAplicadas' : 'toast.corSalva', { n: count })))
+                .then((count) =>
+                  toast(
+                    t(pickerIds.length > 1 ? 'toast.coresAplicadas' : 'toast.corSalva', {
+                      n: count,
+                    }),
+                  ),
+                )
                 .catch(() => toast(t('toast.erroSalvar'), { tone: 'error' }))
             }
           />

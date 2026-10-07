@@ -3,7 +3,7 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export interface Database {
   public: {
     Tables: {
-      mente_backups: {
+      novamente_backups: {
         Row: { user_id: string; backup: Json; updated_at: string };
         Insert: { user_id: string; backup: Json; updated_at?: string };
         Update: { user_id?: string; backup?: Json; updated_at?: string };

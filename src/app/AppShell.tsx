@@ -6,7 +6,6 @@ import { ToastHost } from '@/components/ui/ToastHost';
 import { Canvas } from '@/features/canvas/Canvas';
 import { Icon } from '@/components/ui/Icon';
 import { MobileTreeList } from '@/features/mobile/MobileTreeList';
-import { HelpDialog } from '@/features/help/HelpDialog';
 import { SettingsDialog } from '@/features/settings/SettingsDialog';
 import { Sidebar } from '@/features/sidebar/Sidebar';
 import { TrashPanel } from '@/features/trash/TrashPanel';
@@ -33,12 +32,18 @@ function isEditableTarget(target: EventTarget | null): boolean {
 }
 
 function readMobileViewport() {
-  const compactQuery = typeof window.matchMedia === 'function'
-    ? window.matchMedia('(max-width: 639px), (max-height: 500px) and (orientation: landscape)').matches
-    : window.innerWidth < 640 || (window.innerHeight <= 500 && window.innerWidth > window.innerHeight);
-  const landscapeQuery = typeof window.matchMedia === 'function'
-    ? window.matchMedia('(orientation: landscape)').matches
-    : window.innerWidth > window.innerHeight;
+  const compactQuery =
+    typeof window.matchMedia === 'function'
+      ? window.matchMedia(
+          '(max-width: 639px), (max-width: 900px) and (orientation: landscape), (max-height: 500px) and (orientation: landscape)',
+        ).matches
+      : window.innerWidth < 640 ||
+        ((window.innerWidth <= 900 || window.innerHeight <= 500) &&
+          window.innerWidth > window.innerHeight);
+  const landscapeQuery =
+    typeof window.matchMedia === 'function'
+      ? window.matchMedia('(orientation: landscape)').matches
+      : window.innerWidth > window.innerHeight;
   return { compact: compactQuery, landscape: landscapeQuery };
 }
 
@@ -57,12 +62,16 @@ export function AppShell({ memoryOnly = false }: { memoryOnly?: boolean }) {
   const dialog = useUiStore((state) => state.dialog);
 
   useEffect(() => {
-    const compactQuery = typeof window.matchMedia === 'function'
-      ? window.matchMedia('(max-width: 639px), (max-height: 500px) and (orientation: landscape)')
-      : null;
-    const orientationQuery = typeof window.matchMedia === 'function'
-      ? window.matchMedia('(orientation: landscape)')
-      : null;
+    const compactQuery =
+      typeof window.matchMedia === 'function'
+        ? window.matchMedia(
+            '(max-width: 639px), (max-width: 900px) and (orientation: landscape), (max-height: 500px) and (orientation: landscape)',
+          )
+        : null;
+    const orientationQuery =
+      typeof window.matchMedia === 'function'
+        ? window.matchMedia('(orientation: landscape)')
+        : null;
     const syncViewport = () => setMobileViewport(readMobileViewport());
     syncViewport();
     compactQuery?.addEventListener('change', syncViewport);
@@ -122,7 +131,9 @@ export function AppShell({ memoryOnly = false }: { memoryOnly?: boolean }) {
       const key = event.key.toLowerCase();
       const current = useSettingsStore.getState();
       const update = (patch: Parameters<typeof current.update>[0]) => {
-        void current.update(patch).catch(() => useUiStore.getState().toast(t('toast.erroSalvar'), { tone: 'error' }));
+        void current
+          .update(patch)
+          .catch(() => useUiStore.getState().toast(t('toast.erroSalvar'), { tone: 'error' }));
       };
       const runHistory = (redo: boolean) => {
         historyQueue = historyQueue
@@ -263,6 +274,17 @@ export function AppShell({ memoryOnly = false }: { memoryOnly?: boolean }) {
             >
               <Icon name="search" size={19} />
             </button>
+            {mobileViewport.landscape ? (
+              <button
+                type="button"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted active:bg-bg-hover"
+                aria-label={t('trash.abrir')}
+                title={t('trash.abrir')}
+                onClick={() => useUiStore.getState().openDialog('trash')}
+              >
+                <Icon name="trash" size={19} />
+              </button>
+            ) : null}
           </header>
 
           <div className="relative flex min-h-0 flex-1 flex-col">
@@ -286,7 +308,8 @@ export function AppShell({ memoryOnly = false }: { memoryOnly?: boolean }) {
                 aria-pressed={!showMobileMap}
                 onClick={() => setMobileView('list')}
               >
-                <Icon name="list-tree" size={18} />{t('mobile.listaNotas')}
+                <Icon name="list-tree" size={18} />
+                {t('mobile.listaNotas')}
               </button>
               <button
                 type="button"
@@ -294,21 +317,24 @@ export function AppShell({ memoryOnly = false }: { memoryOnly?: boolean }) {
                 aria-pressed={showMobileMap}
                 onClick={() => setMobileView('map')}
               >
-                <Icon name="map" size={18} />{t('mobile.mapa')}
+                <Icon name="map" size={18} />
+                {t('mobile.mapa')}
               </button>
               <button
                 type="button"
                 className="flex min-w-16 flex-col items-center justify-center gap-0.5 text-[10px] text-muted"
                 onClick={() => setMobileDrawerOpen(true)}
               >
-                <Icon name="folder" size={18} />{t('mobile.categoriasDrawer')}
+                <Icon name="folder" size={18} />
+                {t('mobile.categoriasDrawer')}
               </button>
               <button
                 type="button"
                 className="flex min-w-16 flex-col items-center justify-center gap-0.5 text-[10px] text-muted"
                 onClick={() => useUiStore.getState().openDialog('settings')}
               >
-                <Icon name="settings" size={18} />{t('settings.titulo')}
+                <Icon name="settings" size={18} />
+                {t('settings.titulo')}
               </button>
             </nav>
           ) : null}
@@ -322,7 +348,11 @@ export function AppShell({ memoryOnly = false }: { memoryOnly?: boolean }) {
               }}
             >
               <div className="h-full w-60 shadow-2xl" onClick={() => setMobileDrawerOpen(false)}>
-                <Sidebar collapsedOverride={false} hideCollapseControl />
+                <Sidebar
+                  collapsedOverride={false}
+                  hideCollapseControl
+                  hideTrashButton={mobileViewport.landscape}
+                />
               </div>
             </div>
           ) : null}
@@ -341,7 +371,11 @@ export function AppShell({ memoryOnly = false }: { memoryOnly?: boolean }) {
               >
                 <ErrorBoundary panel="editor">
                   <Suspense
-                    fallback={<div className="h-[70dvh] rounded-t-2xl bg-bg-editor p-6"><div className="h-5 w-40 animate-pulse rounded bg-bg-hover" /></div>}
+                    fallback={
+                      <div className="h-[70dvh] rounded-t-2xl bg-bg-editor p-6">
+                        <div className="h-5 w-40 animate-pulse rounded bg-bg-hover" />
+                      </div>
+                    }
                   >
                     <EditorPanel
                       mobilePresentation={mobileViewport.landscape ? 'side' : 'sheet'}
@@ -362,7 +396,10 @@ export function AppShell({ memoryOnly = false }: { memoryOnly?: boolean }) {
           <main className="flex min-w-0 flex-1 overflow-hidden">
             <ErrorBoundary panel="canvas">
               <div className="min-w-0 flex-1">
-                <Canvas wideView={canvasWide} onToggleWideView={() => setCanvasWide((wide) => !wide)} />
+                <Canvas
+                  wideView={canvasWide}
+                  onToggleWideView={() => setCanvasWide((wide) => !wide)}
+                />
               </div>
             </ErrorBoundary>
 
@@ -388,8 +425,9 @@ export function AppShell({ memoryOnly = false }: { memoryOnly?: boolean }) {
       <ToastHost />
 
       {dialog === 'trash' ? <TrashPanel /> : null}
-      {dialog === 'settings' ? <SettingsDialog /> : null}
-      {dialog === 'help' ? <HelpDialog /> : null}
+      {dialog === 'settings' || dialog === 'help' ? (
+        <SettingsDialog key={dialog} initialPage={dialog === 'help' ? 'help' : 'appearance'} />
+      ) : null}
       {dialog === 'search' ? <SearchDialog /> : null}
     </div>
   );

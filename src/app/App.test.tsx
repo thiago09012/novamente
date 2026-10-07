@@ -122,6 +122,7 @@ describe('App (Fase 1)', () => {
 
     expect((await screen.findAllByText('Comida')).length).toBeGreaterThan(0);
     expect(screen.getByText('Bebidas')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Buscar notas' })).toHaveLength(1);
     // canvas + editor expõem cabeçalho (banner)
     expect((await screen.findAllByRole('banner')).length).toBeGreaterThan(0);
     // contagem da árvore da categoria ativa (Comida tem 1 descendente)
@@ -129,7 +130,7 @@ describe('App (Fase 1)', () => {
     // ações do rodapé
     expect(screen.getByRole('button', { name: 'Abrir lixeira' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Abrir configurações' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Ajuda e atalhos' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ajuda e atalhos' })).not.toBeInTheDocument();
   });
 
   it('cria categoria e entra em renomeação inline', async () => {
@@ -163,5 +164,14 @@ describe('App (Fase 1)', () => {
     expect(dialog).toHaveTextContent('Configurações');
     expect(dialog).toHaveTextContent('Aparência');
     expect(screen.getByRole('radio', { name: /Escuro/ })).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('mantém ajuda e atalhos dentro das configurações', async () => {
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Abrir configurações' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Ajuda e atalhos' }));
+
+    expect((await screen.findAllByText('Navegação')).length).toBeGreaterThan(1);
+    expect(screen.getByText('Árvore (canvas)')).toBeInTheDocument();
   });
 });

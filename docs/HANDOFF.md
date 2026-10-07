@@ -1,6 +1,6 @@
-# HANDOFF — Neuronow
+# HANDOFF — Novamente
 
-_Atualizado em 06/10/2026._ O plano vivo está em `docs/PLAN.md`; requisitos completos em `prompt-mestre-mente.md`.
+_Atualizado em 06/10/2026._ O plano vivo está em `docs/PLAN.md`; requisitos completos em `prompt-mestre-novamente.md`.
 
 ## Estado atual
 

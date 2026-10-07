@@ -19,14 +19,14 @@ test('exporta, apaga e importa o backup JSON completo', async ({ page }) => {
     version: number;
     data: { notes: unknown[]; links: unknown[]; settings: unknown; views: unknown[]; meta: unknown[] };
   };
-  expect(backup.format).toBe('mente-backup');
+  expect(backup.format).toBe('novamente-backup');
   expect(backup.version).toBe(1);
   expect(backup.data.notes.length).toBeGreaterThan(0);
 
   const cleared = await page.evaluate(
     () =>
       new Promise<boolean>((resolve, reject) => {
-        const request = indexedDB.open('mente');
+        const request = indexedDB.open('novamente');
         request.onerror = () => reject(new Error(request.error?.message ?? 'Falha ao abrir IndexedDB'));
         request.onsuccess = () => {
           const db = request.result;
@@ -45,7 +45,7 @@ test('exporta, apaga e importa o backup JSON completo', async ({ page }) => {
   expect(cleared).toBe(true);
 
   await page.locator('input[type="file"]').setInputFiles({
-    name: 'mente-backup.json',
+    name: 'novamente-backup.json',
     mimeType: 'application/json',
     buffer: await readFile(path),
   });
@@ -79,7 +79,7 @@ for (const format of [
     const contents = await readFile(path, 'utf8');
     expect(contents).toContain(format.title);
     await page.locator('input[type="file"]').setInputFiles({
-      name: `mente-import.${format.extension}`,
+      name: `novamente-import.${format.extension}`,
       mimeType: format.extension === 'opml' ? 'text/xml' : 'text/markdown',
       buffer: await readFile(path),
     });

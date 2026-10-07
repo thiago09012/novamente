@@ -12,7 +12,7 @@ export type DatabaseChange =
   | { kind: 'view'; rootId: ID; view: ViewRecord | null }
   | { kind: 'all' };
 
-const CHANNEL_NAME = 'mente-database-sync-v1';
+const CHANNEL_NAME = 'novamente-database-sync-v1';
 const listeners = new Set<(change: DatabaseChange) => void>();
 let channel: BroadcastChannel | null = null;
 let broadcastingEnabled = true;

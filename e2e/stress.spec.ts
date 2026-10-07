@@ -17,7 +17,7 @@ test('mede abertura e pan do canvas com 5.000 notas', async ({ page }, testInfo)
   test.setTimeout(60_000);
   await page.addInitScript(() => {
     const observer = new PerformanceObserver((list) => {
-      const previous = JSON.parse(sessionStorage.getItem('mente-long-tasks') ?? '[]') as Array<{
+      const previous = JSON.parse(sessionStorage.getItem('novamente-long-tasks') ?? '[]') as Array<{
         startTime: number;
         duration: number;
       }>;
@@ -25,7 +25,7 @@ test('mede abertura e pan do canvas com 5.000 notas', async ({ page }, testInfo)
         startTime: entry.startTime,
         duration: entry.duration,
       }));
-      sessionStorage.setItem('mente-long-tasks', JSON.stringify([...previous, ...entries]));
+      sessionStorage.setItem('novamente-long-tasks', JSON.stringify([...previous, ...entries]));
     });
     observer.observe({ type: 'longtask', buffered: true });
   });
@@ -89,7 +89,7 @@ test('mede abertura e pan do canvas com 5.000 notas', async ({ page }, testInfo)
   await page.evaluate(
     async ({ stressNotes, activeRootId }) =>
       new Promise<void>((resolve, reject) => {
-        const request = indexedDB.open('mente');
+        const request = indexedDB.open('novamente');
         request.onerror = () => reject(new Error(request.error?.message ?? 'Falha ao abrir o banco'));
         request.onsuccess = () => {
           const db = request.result;
@@ -123,8 +123,8 @@ test('mede abertura e pan do canvas com 5.000 notas', async ({ page }, testInfo)
   await page.reload();
   await expect(page.getByRole('button', { name: /^Carga de desempenho/ })).toBeVisible();
   await page.evaluate(() => {
-    sessionStorage.setItem('mente-long-tasks', '[]');
-    sessionStorage.setItem('mente-perf-phases', '1');
+    sessionStorage.setItem('novamente-long-tasks', '[]');
+    sessionStorage.setItem('novamente-perf-phases', '1');
     performance.clearMeasures();
   });
   const profiler = process.env.PERF_PROFILE === '1' ? await page.context().newCDPSession(page) : null;
@@ -132,7 +132,7 @@ test('mede abertura e pan do canvas com 5.000 notas', async ({ page }, testInfo)
     await profiler.send('Profiler.enable');
     await profiler.send('Profiler.start');
   }
-  await page.evaluate(() => performance.mark('mente-open-category-start'));
+  await page.evaluate(() => performance.mark('novamente-open-category-start'));
   await page.getByRole('button', { name: /^Carga de desempenho/ }).click();
   await page.waitForFunction(
     (expected) =>
@@ -141,16 +141,16 @@ test('mede abertura e pan do canvas com 5.000 notas', async ({ page }, testInfo)
     `${childCount} notas aqui`,
   );
   const openMs = await page.evaluate(() => {
-    const start = performance.getEntriesByName('mente-open-category-start').at(-1)?.startTime ?? 0;
+    const start = performance.getEntriesByName('novamente-open-category-start').at(-1)?.startTime ?? 0;
     return performance.now() - start;
   });
   const openLongTasks = await page.evaluate(
-    () => JSON.parse(sessionStorage.getItem('mente-long-tasks') ?? '[]') as Array<{startTime: number; duration: number}>,
+    () => JSON.parse(sessionStorage.getItem('novamente-long-tasks') ?? '[]') as Array<{startTime: number; duration: number}>,
   );
   const phaseMeasures = await page.evaluate(() =>
     performance
       .getEntriesByType('measure')
-      .filter((entry) => entry.name.startsWith('mente:'))
+      .filter((entry) => entry.name.startsWith('novamente:'))
       .map((entry) => ({ name: entry.name, milliseconds: entry.duration })),
   );
   const cpuProfile: Array<{ functionName: string; url: string; milliseconds: number }> = [];
@@ -296,8 +296,8 @@ test('mede abertura e pan do canvas com 5.000 notas', async ({ page }, testInfo)
     const lastMeasure = (name: string) =>
       performance.getEntriesByName(name).at(-1)?.duration ?? null;
     return {
-      indexBuildMs: lastMeasure('mente:search-index'),
-      queryMs: lastMeasure('mente:search-query'),
+      indexBuildMs: lastMeasure('novamente:search-index'),
+      queryMs: lastMeasure('novamente:search-query'),
     };
   });
 

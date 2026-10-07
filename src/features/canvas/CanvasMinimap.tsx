@@ -54,17 +54,14 @@ export function CanvasMinimap({
   );
   const offsetX = (WIDTH - layoutWidth * scale) / 2;
   const offsetY = (HEIGHT - layoutHeight * scale) / 2;
-  const nodePath = useMemo(
+  const nodeRects = useMemo(
     () =>
-      nodes
-        .map((node) => {
-          const x = offsetX + node.x * scale;
-          const y = offsetY + node.y * scale;
-          const width = Math.max(1, node.width * scale);
-          const height = Math.max(1, node.height * scale);
-          return `M${x},${y}h${width}v${height}h-${width}z`;
-        })
-        .join(''),
+      nodes.map((node) => ({
+        x: offsetX + node.x * scale,
+        y: offsetY + node.y * scale,
+        width: Math.max(1, node.width * scale),
+        height: Math.max(1, node.height * scale),
+      })),
     [nodes, offsetX, offsetY, scale],
   );
 
@@ -128,11 +125,11 @@ export function CanvasMinimap({
     <div
       role="group"
       aria-label={t('canvas.minimapa')}
-      className="absolute right-3 bottom-3 z-40 overflow-hidden rounded-[var(--radius)] border border-border bg-bg-raised/95 p-1.5 shadow-sm backdrop-blur-sm"
+      className="absolute right-3 bottom-3 z-40 overflow-hidden rounded-[var(--radius-lg)] border border-border bg-material-strong p-1.5 shadow-[var(--shadow)] backdrop-blur-xl"
       data-testid="minimap-panel"
     >
       <div className={`flex h-6 items-center ${open ? 'justify-between' : 'justify-end'} px-1`}>
-        {open ? <span className="text-[10px] font-medium text-muted">{t('canvas.minimapa')}</span> : null}
+        {open ? <span className="text-[11px] font-semibold tracking-[0.02em] text-muted uppercase">{t('canvas.minimapa')}</span> : null}
         <button
           type="button"
           aria-label={t(open ? 'canvas.recolherMinimapa' : 'canvas.expandirMinimapa')}
@@ -173,7 +170,18 @@ export function CanvasMinimap({
             </clipPath>
           </defs>
           <rect width={WIDTH} height={HEIGHT} rx="4" fill="var(--bg-app)" />
-          <path d={nodePath} fill="var(--border-strong)" fillOpacity="0.7" clipPath="url(#minimap-clip)" />
+          <g clipPath="url(#minimap-clip)" fill="currentColor" opacity="0.45" className="text-muted">
+            {nodeRects.map((rect, index) => (
+              <rect
+                key={nodes[index]?.id ?? index}
+                x={rect.x}
+                y={rect.y}
+                width={rect.width}
+                height={rect.height}
+                rx={Math.min(3, rect.height / 2)}
+              />
+            ))}
+          </g>
           <rect
             data-minimap-viewport="true"
             data-testid="minimap-viewport"
@@ -181,6 +189,7 @@ export function CanvasMinimap({
             y={viewY}
             width={viewWidth}
             height={viewHeight}
+            rx={4}
             fill="var(--accent-soft)"
             stroke="var(--accent)"
             strokeWidth="1.5"

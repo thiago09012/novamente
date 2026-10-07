@@ -44,6 +44,19 @@ describe('intercâmbio Markdown e OPML', () => {
     expectImportedHierarchy(backup);
   });
 
+  it('importa arquivos antigos com marcadores e atributos MENTE', () => {
+    const markdown =
+      '<!-- MENTE Markdown exchange v1 -->\n<!-- mente:depth=0 -->\n<!-- mente:tags=["legado"] -->\n# Antigo\n';
+    const backup = importTextBackup('markdown', markdown, defaultSettings(), 10);
+
+    expect(backup.data.notes[0]).toMatchObject({ title: 'Antigo', tags: ['legado'] });
+
+    const opml =
+      '<?xml version="1.0"?><opml version="2.0" xmlns:mente="urn:mente:exchange:v1"><head/><body><outline text="Antigo" mente:content="&quot;texto&quot;" mente:tags="[&quot;legado&quot;]" /></body></opml>';
+    const oldOpml = importTextBackup('opml', opml, defaultSettings(), 10);
+    expect(oldOpml.data.notes[0]).toMatchObject({ title: 'Antigo', contentText: 'texto', tags: ['legado'] });
+  });
+
   it('rejeita XML malformado antes de criar um backup importável', () => {
     expect(() => importTextBackup('opml', '<opml><body><outline>')).toThrow('OPML inválido');
   });

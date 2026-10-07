@@ -1,6 +1,6 @@
-# Contributing to Neuronow
+# Contributing to Novamente
 
-Thanks for considering a contribution! Neuronow is a local-first second brain
+Thanks for considering a contribution! Novamente is a local-first second brain
 (React + TypeScript + Vite + Dexie/IndexedDB + TipTap) with an AI-operable
 Markdown vault and an MCP server. Small, well-tested slices merge fastest.
 
@@ -18,18 +18,18 @@ npm run dev                      # http://localhost:5173
 
 Useful commands:
 
-| Command                 | What it does                                              |
-| ----------------------- | --------------------------------------------------------- |
-| `npm run dev`           | Vite dev server (port 5173)                               |
-| `npm run test`          | Unit tests (Vitest, must stay green)                      |
-| `npm run typecheck`     | `tsc -b` (strict)                                         |
-| `npm run lint`          | ESLint (type-checked)                                     |
-| `npm run build`         | Contrast test + typecheck + production build into `dist/` |
-| `npm run e2e`           | Playwright specs (needs the dev server on 5173)           |
-| `npm run format`        | Prettier across the repo                                  |
-| `npm run neuronow`      | Markdown vault / second-brain CLI (`-- help`)             |
-| `npm run mcp`           | Local MCP stdio server                                    |
-| `npm run mente:connect` | Interactive MCP client setup wizard                       |
+| Command                     | What it does                                              |
+| --------------------------- | --------------------------------------------------------- |
+| `npm run dev`               | Vite dev server (port 5173)                               |
+| `npm run test`              | Unit tests (Vitest, must stay green)                      |
+| `npm run typecheck`         | `tsc -b` (strict)                                         |
+| `npm run lint`              | ESLint (type-checked)                                     |
+| `npm run build`             | Contrast test + typecheck + production build into `dist/` |
+| `npm run e2e`               | Playwright specs (needs the dev server on 5173)           |
+| `npm run format`            | Prettier across the repo                                  |
+| `npm run novamente`         | Markdown vault / second-brain CLI (`-- help`)             |
+| `npm run mcp`               | Local MCP stdio server                                    |
+| `npm run novamente:connect` | Interactive MCP client setup wizard                       |
 
 ## Ground rules (summary)
 

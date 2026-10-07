@@ -7,22 +7,34 @@
   --color-bg-editor: var(--bg-editor);
   --color-bg-node: var(--bg-node);
   --color-bg-hover: var(--bg-hover);
+  --color-bg-active: var(--bg-active);
   --color-bg-raised: var(--bg-raised);
+  --color-material: var(--bg-material);
+  --color-material-strong: var(--bg-material-strong);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
+  --color-hairline: var(--hairline);
+  --color-separator: var(--separator);
   --color-text: var(--text);
   --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
   --color-on-accent: var(--text-on-accent);
   --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
   --color-accent-bg: var(--accent-bg);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-softer: var(--accent-softer);
   --color-danger: var(--danger);
   --color-danger-bg: var(--danger-bg);
   --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-info: var(--info);
   --color-link: var(--link);
   --color-focus: var(--focus);
   --color-edge-link: var(--edge-link);
+  --color-edge-tree: var(--edge-tree);
   --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
   --font-mono: var(--font-mono);
   --radius-sm: var(--radius-sm);
   --radius: var(--radius);
@@ -43,8 +55,49 @@ body {
   font-family: var(--font-sans);
   font-size: var(--text-base);
   line-height: var(--line-normal);
+  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  font-feature-settings: 'ss01', 'cv11';
+}
+
+/*
+ * Grade do canvas (fundo em linhas de 28px) + atmosfera sutil.
+ * Aplicar `.canvas-grid` no contêiner do canvas junto de `bg-bg-app`.
+ */
+.canvas-grid {
+  background-image:
+    linear-gradient(var(--canvas-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--canvas-grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Atmosfera opcional: dois brilhos radiais de acento (só tema escuro). */
+html:not([data-theme='light']) body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 30rem at 15% -10%, rgba(10, 132, 255, 0.06), transparent 60%),
+    radial-gradient(50rem 26rem at 90% 110%, rgba(100, 210, 255, 0.05), transparent 60%);
+}
+
+html:not([data-theme='light']) body > #root {
+  position: relative;
+  z-index: 1;
+}
+
+/* Fluxo da sinapse ativa: deslocamento do tracejado da aresta (1.4s linear). */
+@keyframes edge-flow {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+
+.edge-flow {
+  animation: edge-flow 1.4s linear infinite;
 }
 
 ::selection {
@@ -90,16 +143,33 @@ select {
   scroll-behavior: auto !important;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /*
  * Tipografia do conteúdo das notas (.tiptap-content envolve o EditorContent).
  * O preflight do Tailwind zera títulos e listas; sem estas regras os `#`
- * viram texto corrido e os itens perdem os marcadores. Cores herdadas dos
- * tokens de texto existentes — sem impacto no teste de contraste.
+ * viram texto corrido e os itens perdem os marcadores. Corpo em serifada
+ * (leitura longa), UI em Inter — ver spec "Apple Neural" no vault.
  */
+.tiptap-content {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
 .tiptap-content h1,
 .tiptap-content h2,
 .tiptap-content h3 {
   color: var(--text);
+  font-family: var(--font-sans);
   font-weight: 700;
   line-height: var(--line-tight);
   margin: 1em 0 0.5em;
@@ -107,15 +177,20 @@ select {
 }
 
 .tiptap-content h1 {
-  font-size: var(--text-xl);
+  font-size: 28px;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
 }
 
 .tiptap-content h2 {
-  font-size: var(--text-lg);
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
 }
 
 .tiptap-content h3 {
   font-size: var(--text-base);
+  letter-spacing: -0.02em;
 }
 
 .tiptap-content h1:first-child,
@@ -142,12 +217,18 @@ select {
   margin: 0.25em 0;
 }
 
+.tiptap-content li::marker {
+  color: var(--accent);
+}
+
 .tiptap-content li > p {
   margin: 0;
 }
 
 .tiptap-content blockquote {
-  border-left: 2px solid var(--border-strong);
+  border-left: 2px solid var(--accent);
+  color: var(--text-muted);
+  font-style: italic;
   margin: 0.75em 0;
   padding-left: 1em;
 }
@@ -155,10 +236,14 @@ select {
 .tiptap-content code {
   font-family: var(--font-mono);
   font-size: 0.875em;
+  background-color: var(--accent-softer);
+  border-radius: 6px;
+  padding: 0.1em 0.35em;
 }
 
 .tiptap-content pre {
-  border: 1px solid var(--border);
+  background-color: var(--bg-app);
+  border: 0.5px solid var(--hairline);
   border-radius: var(--radius);
   margin: 0.75em 0;
   overflow-x: auto;
@@ -166,10 +251,14 @@ select {
 }
 
 .tiptap-content pre code {
-  font-size: var(--text-sm);
+  background-color: transparent;
+  border-radius: 0;
+  font-size: 12.5px;
+  line-height: 1.7;
+  padding: 0;
 }
 
 .tiptap-content hr {
-  border-color: var(--border);
+  border-color: var(--hairline);
   margin: 1em 0;
 }

@@ -2,7 +2,8 @@ import { defaultSettings, sanitizeSettings } from './settings';
 import { isAlive } from './tree';
 import type { ID, Link, Note, NoteContentNode, Settings, ViewRecord } from './types';
 
-export const BACKUP_FORMAT = 'mente-backup';
+export const BACKUP_FORMAT = 'novamente-backup';
+const LEGACY_BACKUP_FORMAT = 'mente-backup';
 export const BACKUP_VERSION = 1;
 
 export interface BackupMetaRow {
@@ -78,7 +79,9 @@ function parseContent(value: unknown, depth = 0): NoteContentNode {
     type,
     ...(record(value.attrs) ? { attrs: value.attrs } : {}),
     ...(typeof value.text === 'string' ? { text: value.text } : {}),
-    ...(value.content ? { content: value.content.map((child) => parseContent(child, depth + 1)) } : {}),
+    ...(value.content
+      ? { content: value.content.map((child) => parseContent(child, depth + 1)) }
+      : {}),
     ...(marks ? { marks } : {}),
   };
 }
@@ -91,10 +94,10 @@ function parseNote(value: unknown): Note {
   if (!Array.isArray(tags) || !tags.every((tag) => typeof tag === 'string')) {
     throw new BackupValidationError(`Tags inválidas na nota ${id}.`);
   }
-  const deletedAt = value.deletedAt === null ? null : requireFiniteNumber(value.deletedAt, 'note.deletedAt');
-  const deletedRootId = value.deletedRootId === null
-    ? null
-    : requireString(value.deletedRootId, 'note.deletedRootId');
+  const deletedAt =
+    value.deletedAt === null ? null : requireFiniteNumber(value.deletedAt, 'note.deletedAt');
+  const deletedRootId =
+    value.deletedRootId === null ? null : requireString(value.deletedRootId, 'note.deletedRootId');
   if (value.color !== null && typeof value.color !== 'string') {
     throw new BackupValidationError(`Cor inválida na nota ${id}.`);
   }
@@ -142,7 +145,8 @@ function parseView(value: unknown): ViewRecord {
     panX: requireFiniteNumber(value.panX, 'view.panX'),
     panY: requireFiniteNumber(value.panY, 'view.panY'),
     zoom: requireFiniteNumber(value.zoom, 'view.zoom'),
-    selectedId: value.selectedId === null ? null : requireString(value.selectedId, 'view.selectedId'),
+    selectedId:
+      value.selectedId === null ? null : requireString(value.selectedId, 'view.selectedId'),
   };
 }
 
@@ -150,7 +154,8 @@ function uniqueBy<T>(items: readonly T[], key: (item: T) => string, label: strin
   const keys = new Set<string>();
   for (const item of items) {
     const value = key(item);
-    if (keys.has(value)) throw new BackupValidationError(`Identificador duplicado em ${label}: ${value}.`);
+    if (keys.has(value))
+      throw new BackupValidationError(`Identificador duplicado em ${label}: ${value}.`);
     keys.add(value);
   }
 }
@@ -169,30 +174,36 @@ function validateRelationships(data: BackupData): void {
     const ancestors = new Set<ID>([note.id]);
     let parentId = note.parentId;
     while (parentId) {
-      if (ancestors.has(parentId)) throw new BackupValidationError(`Ciclo na árvore da nota ${note.id}.`);
+      if (ancestors.has(parentId))
+        throw new BackupValidationError(`Ciclo na árvore da nota ${note.id}.`);
       ancestors.add(parentId);
       parentId = byId.get(parentId)?.parentId ?? null;
     }
   }
 
-  const categories = new Set(data.notes.filter((note) => note.parentId === null).map((note) => note.id));
+  const categories = new Set(
+    data.notes.filter((note) => note.parentId === null).map((note) => note.id),
+  );
   for (const link of data.links) {
     if (!byId.has(link.fromId) || (link.toId !== null && !byId.has(link.toId))) {
       throw new BackupValidationError(`Referência inexistente no link ${link.id}.`);
     }
   }
   for (const view of data.views) {
-    if (!categories.has(view.rootId) || (view.selectedId && !byId.has(view.selectedId)) || view.zoom <= 0) {
+    if (
+      !categories.has(view.rootId) ||
+      (view.selectedId && !byId.has(view.selectedId)) ||
+      view.zoom <= 0
+    ) {
       throw new BackupValidationError(`Referência inválida na visualização ${view.rootId}.`);
     }
   }
-  if (
-    data.settings.lastCategoryId !== null &&
-    !categories.has(data.settings.lastCategoryId)
-  ) {
+  if (data.settings.lastCategoryId !== null && !categories.has(data.settings.lastCategoryId)) {
     throw new BackupValidationError('Categoria ativa inválida nas configurações do backup.');
   }
-  const deletedRoots = new Set(data.notes.filter((note) => note.deletedAt !== null).map((note) => note.id));
+  const deletedRoots = new Set(
+    data.notes.filter((note) => note.deletedAt !== null).map((note) => note.id),
+  );
   for (const note of data.notes) {
     if (note.deletedRootId !== null && !deletedRoots.has(note.deletedRootId)) {
       throw new BackupValidationError(`Raiz da lixeira inexistente na nota ${note.id}.`);
@@ -201,12 +212,21 @@ function validateRelationships(data: BackupData): void {
 }
 
 export function parseBackup(value: unknown): BackupFile {
-  if (!record(value) || value.format !== BACKUP_FORMAT || value.version !== BACKUP_VERSION) {
+  if (
+    !record(value) ||
+    (value.format !== BACKUP_FORMAT && value.format !== LEGACY_BACKUP_FORMAT) ||
+    value.version !== BACKUP_VERSION
+  ) {
     throw new BackupValidationError('Formato ou versão de backup não suportado.');
   }
   if (!record(value.data)) throw new BackupValidationError('Dados do backup ausentes.');
   const raw = value.data;
-  if (!Array.isArray(raw.notes) || !Array.isArray(raw.links) || !Array.isArray(raw.views) || !Array.isArray(raw.meta)) {
+  if (
+    !Array.isArray(raw.notes) ||
+    !Array.isArray(raw.links) ||
+    !Array.isArray(raw.views) ||
+    !Array.isArray(raw.meta)
+  ) {
     throw new BackupValidationError('Tabelas do backup inválidas.');
   }
   if (!record(raw.settings)) throw new BackupValidationError('Configurações ausentes no backup.');

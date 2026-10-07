@@ -26,19 +26,19 @@ describe('markdown codec', () => {
             type: 'paragraph',
             content: [
               { type: 'text', text: 'Ver ' },
-              { type: 'wikilink', attrs: { noteId: '01X', title: 'App Mente', sourceId: '01TEST' } },
+              { type: 'wikilink', attrs: { noteId: '01X', title: 'App Novamente', sourceId: '01TEST' } },
               { type: 'text', text: '.' },
             ],
           },
         ],
       },
-      contentText: 'Ver App Mente.',
+      contentText: 'Ver App Novamente.',
     });
     const md = noteToMarkdown(note);
     expect(md).toContain('id: 01TEST');
     expect(md).toContain('parentId: null');
     expect(md).toContain('tags: [rotina]');
-    expect(md).toContain('[[App Mente]]');
+    expect(md).toContain('[[App Novamente]]');
   });
 
   it('faz round-trip de parágrafos, negrito, lista e código', () => {

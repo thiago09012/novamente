@@ -19,6 +19,7 @@ Registro no formato: **decisão → motivo → consequência**. Atualizado a cad
 3. **Movimento controlado por JS (`data-motion="reduced"|"full"`)** e não só por `prefers-reduced-motion` → a configuração "Movimento" do usuário precisa vencer o sistema, e testes conseguem forçar o estado.
 4. **Microcopy toda em pt-BR via `src/i18n` com `t()` tipado** → nenhum texto visível fora do dicionário; parâmetros via `{chave}`.
 5. **IDs ULID (`ulid`)** para notas, links e toasts → ordenáveis cronologicamente e globais (prepara sync, fora do MVP).
+6. **Design system "Apple Neural" aplicado (2026-10-07)** → spec na nota do vault `Design Spec · Apple Neural`; accent systemBlue, superfícies OLED `#000`, vidro + hairlines, grafo como identidade. Desvios intencionais documentados em `tokens.css`/`contrast.test.ts`: sem fontes remotas (offline-first; Inter via fontsource bundlado), amarelo/vermelho claros mantidos escuros em texto (AA), hairlines fora dos pares de borda (decorativas), rótulos sobre acento com mínimo 3:1, bordas 1px com cor de hairline.
 
 ## 2. Arquitetura e código
 
@@ -74,6 +75,12 @@ Registro no formato: **decisão → motivo → consequência**. Atualizado a cad
 2. **Categorias em drawer e editor em bottom sheet no retrato/painel lateral na paisagem** → mantém o contexto da lista ou do mapa durante a seleção; os mesmos stores e repositórios servem desktop e mobile.
 3. **Breakpoints consideram altura curta em paisagem além da largura de 639 px** → celulares horizontais costumam ter viewport com largura acima do breakpoint de retrato.
 4. **Canvas mobile oculta o cabeçalho duplicado, as linhas da sidebar e o minimapa, e ajusta a árvore ao viewport ao entrar/trocar orientação** → libera área útil e evita conectores da categoria cortando os nós quando a sidebar está na gaveta.
+
+## 10. Princípio tree-first (regra permanente, 2026-10-07)
+
+1. **Toda feature nova aproveita os conceitos de notas em árvore** → o Novamente é uma árvore (`parentId` + `orderKey` com fractional indexing, `childIds` derivado em memória, categorias = raízes com `parentId: null`), não uma lista plana; ignorar isso gera UX e código estranhos ao modelo.
+2. **Regras que valem ao implementar** → ler/escrever via `src/domain/tree.ts` (`childrenOf`, `getDescendants`, `getPath`, `isCategory`, `isAlive`) e `src/domain/order.ts`; ordenar por `orderKey`, nunca por timestamp ou índice numérico; IDs sempre ULID; nunca persistir derivados (`childIds`, contagens, caminhos).
+3. **Consequência prática** → antes de criar estado, tabela, índice ou UI nova, responder: onde isso mora na árvore? É filho de quê? Como ordena? Como aparece no canvas, na busca, no vault Markdown (`parentId` manda, pasta só vale se ausente) e no backup JSON? Se a resposta for "fora da árvore", justificar em `docs/DECISIONS.md`.
 
 ## 3. Ambiente
 

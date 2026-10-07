@@ -17,7 +17,7 @@ export interface MarkdownVaultHandleRow {
   handle: FileSystemDirectoryHandle;
 }
 
-export class MenteDatabase extends Dexie {
+export class NovamenteDatabase extends Dexie {
   notes!: Table<Note, ID>;
   links!: Table<Link, ID>;
   settings!: Table<SettingsRow, string>;
@@ -25,7 +25,7 @@ export class MenteDatabase extends Dexie {
   meta!: Table<MetaRow, string>;
   vaultHandles!: Table<MarkdownVaultHandleRow, string>;
 
-  constructor(name = 'mente') {
+  constructor(name = 'novamente') {
     super(name);
     this.version(1).stores({
       notes: 'id, parentId, [parentId+orderKey], deletedAt, updatedAt, *tags',

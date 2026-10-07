@@ -492,7 +492,7 @@ export function EditorPanel({
             value={title}
             maxLength={200}
             placeholder={t('editor.placeholderTitulo')}
-            className="mb-3 w-full border-0 bg-transparent text-2xl font-semibold text-text outline-none placeholder:text-muted"
+            className="mb-3 w-full border-0 bg-transparent text-[28px] leading-[1.15] font-bold tracking-[-0.025em] text-text outline-none placeholder:text-muted"
             onChange={(event) => changeTitle(event.currentTarget.value)}
             onBlur={() => void commitTitle(note.id, title)}
             onKeyDown={(event) => {
@@ -536,10 +536,10 @@ export function EditorPanel({
           )}
 
           <section aria-labelledby="editor-tags-heading" className="mt-5 border-t border-border pt-3">
-            <h2 id="editor-tags-heading" className="mb-2 text-xs font-semibold text-muted">{t('editor.tags')}</h2>
+            <h2 id="editor-tags-heading" className="mb-2 text-[11px] font-semibold tracking-[0.02em] text-muted uppercase">{t('editor.tags')}</h2>
             <div className="flex flex-wrap items-center gap-1.5">
               {note.tags.map((tag) => (
-                <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-bg-hover px-2 py-1 text-xs text-text">
+                <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-accent-softer px-2 py-1 font-mono text-[11px] font-medium text-accent-text">
                   #{tag}
                   <button type="button" aria-label={t('editor.removerTag', { nome: tag })} onClick={() => void changeTags(note.tags.filter((item) => item !== tag))}>
                     <Icon name="x" size={12} />
@@ -572,7 +572,7 @@ export function EditorPanel({
 
           <section aria-labelledby="editor-subnotes-heading" className="mt-5 border-t border-border pt-3">
             <div className="mb-2 flex items-center justify-between gap-2">
-              <h2 id="editor-subnotes-heading" className="text-xs font-semibold text-muted">{t('editor.subnotas')}</h2>
+              <h2 id="editor-subnotes-heading" className="text-[11px] font-semibold tracking-[0.02em] text-muted uppercase">{t('editor.subnotas')}</h2>
               <Button variant="ghost" size="sm" aria-label={t('editor.adicionarSubnota')} onClick={() => {
                 void useNotesStore.getState().createNote({ parentId: note.id }).then((createdNote) => {
                   useUiStore.getState().requestNavigation(createdNote.id);
@@ -607,7 +607,7 @@ export function EditorPanel({
           </section>
 
           <section aria-labelledby="editor-backlinks-heading" className="mt-5 border-t border-border pt-3">
-            <h2 id="editor-backlinks-heading" className="mb-2 text-xs font-semibold text-muted">{t('editor.backlinks', { n: backlinks.length })}</h2>
+            <h2 id="editor-backlinks-heading" className="mb-2 text-[11px] font-semibold tracking-[0.02em] text-muted uppercase">{t('editor.backlinks', { n: backlinks.length })}</h2>
             {backlinks.length > 0 ? (
               <ul className="flex flex-col gap-1">
                 {backlinks.map((backlink) => (

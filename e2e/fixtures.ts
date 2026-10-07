@@ -8,7 +8,7 @@ export const test = base.extend({
     await page.evaluate(
       () =>
         new Promise<void>((resolve, reject) => {
-          const request = indexedDB.deleteDatabase('mente');
+          const request = indexedDB.deleteDatabase('novamente');
           request.onsuccess = () => resolve();
           request.onerror = () => reject(request.error ?? new Error('Falha ao limpar banco E2E'));
           request.onblocked = () => reject(new Error('O banco de teste continuou aberto'));

@@ -1,46 +1,76 @@
 /*
- * Tokens visuais do Neuronow.
+ * Tokens visuais do Novamente — design system "Apple Neural".
  * Este arquivo é analisado por src/styles/contrast.test.ts — todo par de cores
- * listado ali precisa manter WCAG AA (texto: 4.5:1, componentes: 3:1).
+ * listado ali precisa manter WCAG AA (texto de corpo: 4.5:1, componentes: 3:1).
+ *
+ * Desvios intencionais da spec (para manter AA):
+ * - `--text-muted` claro usa 72% em vez de 60% (60% falha 4.5:1 sobre branco).
+ * - `--warning`/`--danger` claros mantêm tons escuros de texto (amarelo/vermelho
+ *   sistema puros não passam 4.5:1 sobre superfícies claras; valem para fills).
+ * - `--bg-node` escuro é o equivalente opaco do vidro sobre o canvas (#1C1C1E);
+ *   o efeito de vidro real vem de `--bg-material-strong` + blur nos componentes.
+ * - Hairlines são decorativas (nunca carregam informação sozinhas) e por isso
+ *   não entram nos pares de componentes do teste de contraste.
  */
 
 :root {
   color-scheme: dark;
 
-  /* ---- superfícies ---- */
-  --bg-app: #0f0f0f;
-  --bg-sidebar: #0a0a0a;
-  --bg-editor: #121212;
-  --bg-node: #1a1a1a;
-  --bg-hover: #232323;
-  --bg-raised: #1f1f1f;
+  /* ---- superfícies opacas (base para o teste de contraste) ---- */
+  --bg-app: #000000;
+  --bg-sidebar: #1c1c1e;
+  --bg-editor: #1c1c1e;
+  --bg-node: #1c1c1e;
+  --bg-hover: rgba(120, 120, 128, 0.2);
+  --bg-active: rgba(120, 120, 128, 0.36);
+  --bg-raised: #2c2c2e;
 
-  /* ---- linhas ---- */
-  --border: #2a2a2a;
-  --border-strong: #6e6e6e;
+  /* ---- materiais translúcidos (vidro: usar com backdrop-blur) ---- */
+  --bg-material: rgba(44, 44, 46, 0.72);
+  --bg-material-strong: rgba(28, 28, 30, 0.85);
+
+  /* ---- linhas (hairlines decorativas, sempre 0.5px) ---- */
+  --border: rgba(84, 84, 88, 0.35);
+  --border-strong: rgba(84, 84, 88, 0.65);
+  --separator: rgba(84, 84, 88, 0.65);
+  --hairline: rgba(84, 84, 88, 0.35);
 
   /* ---- texto ---- */
-  --text: #e8e8e8;
-  --text-muted: #a3a3a3;
-  --text-on-accent: #f2fdf5;
-  --text-on-accent-button: #052e16;
+  --text: #ffffff;
+  --text-muted: rgba(235, 235, 245, 0.6);
+  --text-faint: rgba(235, 235, 245, 0.3);
+  --text-on-accent: #ffffff;
+  --text-on-accent-button: #ffffff;
 
-  /* ---- acentos ---- */
-  --accent: #4ade80;
-  --accent-bg: #14532d;
-  --accent-soft: rgba(74, 222, 128, 0.12);
-  --danger: #f87171;
-  --danger-bg: #451a1a;
-  --warning: #fbbf24;
-  --link: #4ade80;
-  --focus: #4ade80;
-  --selection: rgba(74, 222, 128, 0.28);
-  --edge-link: #f59e0b;
+  /* ---- acentos (systemBlue) ---- */
+  --accent: #0a84ff;
+  --accent-text: #0a84ff;
+  --accent-bg: rgba(10, 132, 255, 0.18);
+  --accent-soft: rgba(10, 132, 255, 0.18);
+  --accent-softer: rgba(10, 132, 255, 0.1);
+  --danger: #ff453a;
+  --danger-bg: rgba(255, 69, 58, 0.14);
+  --warning: #ffd60a;
+  --success: #30d158;
+  --info: #64d2ff;
+  --link: #0a84ff;
+  --focus: #0a84ff;
+  --selection: rgba(10, 132, 255, 0.28);
+
+  /* ---- grafo ---- */
+  --edge-link: rgba(10, 132, 255, 0.55);
+  --edge-tree: rgba(235, 235, 245, 0.14);
+  --canvas-grid: rgba(235, 235, 245, 0.07);
   --scrollbar: #3f3f3f;
 
+  /* ---- glow (só estado ativo) ---- */
+  --glow: rgba(10, 132, 255, 0.55);
+
   /* ---- tipografia ---- */
-  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono', monospace;
+  --font-sans: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+    system-ui, sans-serif;
+  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, 'Cascadia Mono', monospace;
   --ui-scale: 1;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -50,7 +80,7 @@
   --line-tight: 1.25;
   --line-normal: 1.55;
 
-  /* ---- espaço e raios ---- */
+  /* ---- espaço e raios (escala Apple: 14 nós/floats, 10 botões, 8 itens, 7 ícone) ---- */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -58,64 +88,83 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
-  --radius-sm: 6px;
-  --radius: 8px;
-  --radius-lg: 12px;
+  --radius-sm: 8px;
+  --radius: 10px;
+  --radius-lg: 14px;
   --radius-full: 999px;
 
   /* ---- medidas ---- */
   --touch: 44px;
-  --sidebar-w: 240px;
+  --sidebar-w: 280px;
   --sidebar-w-collapsed: 56px;
   --editor-w: 420px;
   --node-height: 44px;
-  --node-font-size: 14px;
-  --header-h: 56px;
+  --node-font-size: 13px;
+  --header-h: 52px;
 
   /* ---- movimento ---- */
-  --dur-fast: 120ms;
+  --dur-fast: 150ms;
   --dur: 200ms;
   --dur-slow: 250ms;
-  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.55);
-  --glow: 0 0 0 1px var(--accent), 0 0 14px rgba(74, 222, 128, 0.25);
+  /* ---- elevação multicamada ---- */
+  --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.35),
+    0 24px 48px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.45);
+  --glow-shadow: 0 0 0 3px var(--accent-soft), 0 8px 20px rgba(10, 132, 255, 0.25), var(--shadow);
 }
 
 [data-theme='light'] {
   color-scheme: light;
 
-  --bg-app: #fafaf9;
-  --bg-sidebar: #f5f4f1;
+  --bg-app: #f5f5f7;
+  --bg-sidebar: #ffffff;
   --bg-editor: #ffffff;
   --bg-node: #ffffff;
-  --bg-hover: #eeede9;
+  --bg-hover: rgba(120, 120, 128, 0.08);
+  --bg-active: rgba(120, 120, 128, 0.16);
   --bg-raised: #ffffff;
 
-  --border: #dedbd6;
-  --border-strong: #767676;
+  --bg-material: rgba(255, 255, 255, 0.72);
+  --bg-material-strong: rgba(255, 255, 255, 0.88);
 
-  --text: #1c1b19;
-  --text-muted: #57544f;
-  --text-on-accent: #064e3b;
+  --border: rgba(60, 60, 67, 0.16);
+  --border-strong: rgba(60, 60, 67, 0.29);
+  --separator: rgba(60, 60, 67, 0.29);
+  --hairline: rgba(60, 60, 67, 0.16);
+
+  --text: #1d1d1f;
+  --text-muted: rgba(60, 60, 67, 0.72);
+  --text-faint: rgba(60, 60, 67, 0.3);
+  --text-on-accent: #ffffff;
   --text-on-accent-button: #ffffff;
 
-  --accent: #15803d;
-  --accent-bg: #dcfce7;
-  --accent-soft: rgba(21, 128, 61, 0.1);
+  --accent: #007aff;
+  --accent-text: #0040dd;
+  --accent-bg: rgba(0, 122, 255, 0.12);
+  --accent-soft: rgba(0, 122, 255, 0.12);
+  --accent-softer: rgba(0, 122, 255, 0.06);
   --danger: #c11f1f;
-  --danger-bg: #fde8e8;
+  --danger-bg: rgba(193, 31, 31, 0.1);
   --warning: #9a4708;
-  --link: #15803d;
-  --focus: #15803d;
-  --selection: rgba(21, 128, 61, 0.22);
-  --edge-link: #9a4708;
+  --success: #34c759;
+  --info: #5ac8fa;
+  --link: #0040dd;
+  --focus: #007aff;
+  --selection: rgba(0, 122, 255, 0.22);
+
+  --edge-link: rgba(0, 122, 255, 0.45);
+  --edge-tree: rgba(60, 60, 67, 0.12);
+  --canvas-grid: rgba(60, 60, 67, 0.09);
   --scrollbar: #c4c0b8;
 
-  --shadow-sm: 0 1px 2px rgba(28, 27, 25, 0.08);
-  --shadow: 0 4px 16px rgba(28, 27, 25, 0.12);
-  --shadow-lg: 0 12px 40px rgba(28, 27, 25, 0.18);
-  --glow: 0 0 0 1px var(--accent), 0 0 14px rgba(21, 128, 61, 0.2);
+  --glow: rgba(0, 122, 255, 0.28);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 12px 32px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.12);
+  --glow-shadow: 0 0 0 3px var(--accent-soft), 0 8px 20px rgba(0, 122, 255, 0.18), var(--shadow);
 }

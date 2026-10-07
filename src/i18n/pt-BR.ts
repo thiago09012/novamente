@@ -4,7 +4,7 @@
  */
 export const ptBR = {
   app: {
-    name: 'Neuronow',
+    name: 'Novamente',
     tagline: 'Projetos e ideias conectados, prontos para a IA',
     carregando: 'Carregando…',
   },
@@ -251,6 +251,18 @@ export const ptBR = {
   settings: {
     titulo: 'Configurações',
     abrir: 'Abrir configurações',
+    navegacao: 'Categorias de configurações',
+    navAppearance: 'Aparência',
+    navNavigation: 'Navegação',
+    navData: 'Notas e dados',
+    navCloud: 'Conta e nuvem',
+    navLanguage: 'Idioma',
+    descAppearance: 'Ajuste o tema e o tamanho dos elementos da interface.',
+    descNavigation: 'Personalize a árvore de notas e reduza animações.',
+    descData: 'Conecte sua pasta Markdown, exporte dados ou importe um backup.',
+    descCloud: 'Gerencie sua conta e as cópias armazenadas na nuvem.',
+    descLanguage: 'Idioma usado nos menus e mensagens do Novamente.',
+    idiomaAtual: 'Atual',
     aparencia: 'Aparência',
     tema: 'Tema',
     temaEscuro: 'Escuro',
@@ -281,6 +293,12 @@ export const ptBR = {
     aiContextExportar: 'Exportar contexto do projeto ativo para IA',
     aiContextExportado: 'Contexto do projeto exportado em Markdown.',
     aiContextErro: 'Não foi possível exportar o contexto do projeto.',
+    exportacoes: 'Exportar uma cópia',
+    exportacoesAjuda:
+      'Escolha o formato conforme o uso. O JSON preserva também configurações e visualizações.',
+    importacoes: 'Importar dados',
+    importacoesAjuda:
+      'A importação substitui as notas atuais. Você poderá revisar o arquivo e confirmar antes de aplicar.',
     markdownVaultAjuda:
       'Em navegador compatível e ambiente seguro, conecte uma pasta dedicada dentro do vault do Obsidian. Sincronize ao iniciar uma sessão da IA; depois, as edições feitas no app são gravadas primeiro no Markdown. Sincronize novamente após a IA editar os arquivos. Apague notas pelo app; arquivos removidos no Obsidian podem ser restaurados. O navegador pode pedir permissão novamente.',
     markdownVaultConectar: 'Conectar pasta Markdown do Obsidian',
@@ -288,7 +306,7 @@ export const ptBR = {
     markdownVaultSincronizar: 'Sincronizar pasta Markdown',
     markdownVaultAlterar: 'Trocar pasta',
     markdownVaultSincronizado:
-      'Sincronização concluída: {notes} notas no vault, {created} novas, {updated} atualizadas e {conflicts} conflitos. Confira .mente/review.md.',
+      'Sincronização concluída: {notes} notas no vault, {created} novas, {updated} atualizadas e {conflicts} conflitos. Confira .novamente/review.md.',
     markdownVaultErro:
       'Não foi possível sincronizar a pasta Markdown. Verifique a permissão e os arquivos.',
     markdownVaultNeedsSync:
@@ -302,7 +320,7 @@ export const ptBR = {
     backupExportado: 'Backup exportado.',
     backupErroExportar: 'Não foi possível exportar o backup.',
     backupArquivoInvalido: 'O arquivo não é um backup JSON válido.',
-    backupImportado: 'Backup importado. Recarregando o Neuronow…',
+    backupImportado: 'Backup importado. Recarregando o Novamente…',
     backupErroImportar: 'Não foi possível importar o backup. Os dados atuais foram preservados.',
     confirmarImportacao: 'Confirmar importação do backup',
     backupResumo: '{notes} notas, {categories} categorias.',
@@ -311,7 +329,7 @@ export const ptBR = {
     cloudTitulo: 'Cópia na nuvem (Supabase)',
     cloudCarregando: 'Carregando opções da nuvem…',
     cloudNaoConfigurado:
-      'Configure VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY para ativar a conta e a cópia na nuvem. O Neuronow continua funcionando localmente sem essas variáveis.',
+      'Configure VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY para ativar a conta e a cópia na nuvem. O Novamente continua funcionando localmente sem essas variáveis.',
     cloudAjuda:
       'Sua base fica neste navegador até você enviar uma cópia. Restaurar substitui os dados locais. A cópia fica protegida por conta, mas não tem criptografia ponta a ponta: administradores do projeto Supabase podem acessar o conteúdo.',
     cloudEmail: 'E-mail',
@@ -340,6 +358,7 @@ export const ptBR = {
   help: {
     titulo: 'Ajuda e atalhos',
     abrir: 'Ajuda e atalhos',
+    descricao: 'Consulte os atalhos de teclado e as orientações de navegação do Novamente.',
     vazio: 'Os atalhos completos aparecem aqui conforme ficam disponíveis.',
     secaoNavegacao: 'Navegação',
     secaoArvore: 'Árvore (canvas)',

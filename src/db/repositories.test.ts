@@ -5,16 +5,16 @@ import { EMPTY_DOC } from '@/domain/content';
 import { ulid } from 'ulid';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { MenteDatabase } from './database';
+import { NovamenteDatabase } from './database';
 import { createDexieRepositories } from './repositories/dexie';
 import type { Repositories } from './repositories/types';
 
 import { makeNote } from '../tests/factories';
 
-const open: MenteDatabase[] = [];
+const open: NovamenteDatabase[] = [];
 
 function freshRepos(): Repositories {
-  const db = new MenteDatabase(`repo-${Date.now()}-${open.length}`);
+  const db = new NovamenteDatabase(`repo-${Date.now()}-${open.length}`);
   open.push(db);
   return createDexieRepositories(db);
 }

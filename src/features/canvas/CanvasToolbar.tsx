@@ -80,7 +80,7 @@ export function CanvasToolbar({
       <div
         role="toolbar"
         aria-label={t('a11y.ferramentasCanvas')}
-        className="absolute top-2 right-2 z-20 flex items-center gap-0.5 rounded-[var(--radius)] border border-border bg-bg-raised/95 p-1 shadow-sm backdrop-blur-sm"
+        className="absolute top-2 right-2 z-20 flex items-center gap-0.5 rounded-[var(--radius-lg)] border border-border bg-material-strong p-1 shadow-[var(--shadow)] backdrop-blur-xl"
       >
         <ToolButton icon="target" label={t('canvas.centralizar')} onClick={onCenter} />
         <ToolButton icon="scan" label={t('canvas.ajustarTela')} onClick={onFit} />
@@ -117,7 +117,7 @@ export function CanvasToolbar({
       <div
         role="group"
         aria-label={t('a11y.controleZoom')}
-        className="absolute bottom-3 left-3 z-20 flex items-center gap-0.5 rounded-[var(--radius)] border border-border bg-bg-raised/95 p-1 shadow-sm backdrop-blur-sm"
+        className="absolute bottom-3 left-3 z-20 flex items-center gap-0.5 rounded-[var(--radius-lg)] border border-border bg-material-strong p-1 shadow-[var(--shadow)] backdrop-blur-xl"
       >
         <ToolButton icon="zoom-out" label={t('canvas.zoomAfastar')} onClick={onZoomOut} />
         <button

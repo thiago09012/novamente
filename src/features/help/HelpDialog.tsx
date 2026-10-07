@@ -32,45 +32,51 @@ const GLOBAL: ShortcutRow[] = [
   { keys: 'Ctrl/⌘ + /', key: 'help.abrirAjuda' },
 ];
 
+export function HelpContent() {
+  return (
+    <div className="flex flex-col gap-4">
+      <section>
+        <h3 className="mb-2 text-sm font-semibold text-text">{t('help.secaoNavegacao')}</h3>
+        <ul className="flex flex-col gap-1.5" role="list">
+          {NAVIGATION.map((row) => (
+            <li key={row.keys} className="flex items-center justify-between gap-4 text-sm">
+              <span className="text-muted">{t(row.key)}</span>
+              <kbd className="rounded-[var(--radius-sm)] border border-border-strong bg-bg-app px-2 py-0.5 font-mono text-xs text-text">
+                {row.keys}
+              </kbd>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h3 className="mb-2 text-sm font-semibold text-text">{t('help.secaoArvore')}</h3>
+        <ul className="flex flex-col gap-1.5" role="list">
+          {GLOBAL.map((row) => (
+            <li key={row.keys} className="flex items-center justify-between gap-4 text-sm">
+              <span className="text-muted">{t(row.key)}</span>
+              <kbd className="rounded-[var(--radius-sm)] border border-border-strong bg-bg-app px-2 py-0.5 font-mono text-xs text-text">
+                {row.keys}
+              </kbd>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <p className="flex items-start gap-2 rounded-[var(--radius)] border border-border bg-bg-app p-3 text-xs text-muted">
+        <Icon name="info" size={14} className="mt-0.5 shrink-0" />
+        {t('help.vazio')}
+      </p>
+    </div>
+  );
+}
+
 export function HelpDialog() {
   const closeDialog = useUiStore((state) => state.closeDialog);
 
   return (
     <Dialog open onClose={closeDialog} title={t('help.titulo')} width="30rem">
-      <div className="flex flex-col gap-4">
-        <section>
-          <h3 className="mb-2 text-sm font-semibold text-text">{t('help.secaoNavegacao')}</h3>
-          <ul className="flex flex-col gap-1.5" role="list">
-            {NAVIGATION.map((row) => (
-              <li key={row.keys} className="flex items-center justify-between gap-4 text-sm">
-                <span className="text-muted">{t(row.key)}</span>
-                <kbd className="rounded-[var(--radius-sm)] border border-border-strong bg-bg-app px-2 py-0.5 font-mono text-xs text-text">
-                  {row.keys}
-                </kbd>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section>
-          <h3 className="mb-2 text-sm font-semibold text-text">{t('help.secaoArvore')}</h3>
-          <ul className="flex flex-col gap-1.5" role="list">
-            {GLOBAL.map((row) => (
-              <li key={row.keys} className="flex items-center justify-between gap-4 text-sm">
-                <span className="text-muted">{t(row.key)}</span>
-                <kbd className="rounded-[var(--radius-sm)] border border-border-strong bg-bg-app px-2 py-0.5 font-mono text-xs text-text">
-                  {row.keys}
-                </kbd>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <p className="flex items-start gap-2 rounded-[var(--radius)] border border-border bg-bg-app p-3 text-xs text-muted">
-          <Icon name="info" size={14} className="mt-0.5 shrink-0" />
-          {t('help.vazio')}
-        </p>
-      </div>
+      <HelpContent />
     </Dialog>
   );
 }

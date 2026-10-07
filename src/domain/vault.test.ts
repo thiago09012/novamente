@@ -10,13 +10,19 @@ import {
   mergeVaultNotes,
   moveNoteInGraph,
   notesToBackup,
+  parseManifest,
   searchNotes,
   tagNoteInGraph,
 } from './vault';
 
 function sampleGraph() {
   const projs = makeNote({ id: 'cat-projs', parentId: null, title: 'Projetos', orderKey: 'a0' });
-  const app = makeNote({ id: 'note-app', parentId: 'cat-projs', title: 'App Mente', orderKey: 'a0' });
+  const app = makeNote({
+    id: 'note-app',
+    parentId: 'cat-projs',
+    title: 'App Novamente',
+    orderKey: 'a0',
+  });
   const pwa = makeNote({
     id: 'note-pwa',
     parentId: 'note-app',
@@ -30,31 +36,40 @@ function sampleGraph() {
           type: 'paragraph',
           content: [
             { type: 'text', text: 'Ver ' },
-            { type: 'wikilink', attrs: { noteId: 'note-app', title: 'App Mente', sourceId: 'note-pwa' } },
+            {
+              type: 'wikilink',
+              attrs: { noteId: 'note-app', title: 'App Novamente', sourceId: 'note-pwa' },
+            },
           ],
         },
       ],
     },
-    contentText: 'Ver App Mente',
+    contentText: 'Ver App Novamente',
   });
   return [projs, app, pwa];
 }
 
 describe('vault', () => {
+  it('lê manifest legado sem rebaixar o formato novo', () => {
+    const manifest = parseManifest({ format: 'mente-vault', version: 1, notes: [] });
+
+    expect(manifest.format).toBe('novamente-vault');
+  });
+
   it('exporta e recarrega o grafo sem perder ids nem hierarquia', () => {
     const notes = sampleGraph();
     const { files, manifest } = exportVault(notes, { now: 10 });
-    expect(manifest.format).toBe('mente-vault');
+    expect(manifest.format).toBe('novamente-vault');
     expect(manifest.notes).toHaveLength(3);
 
     const mdFiles = files.filter((file) => file.path.endsWith('.md'));
     const loaded = loadVaultNotes(mdFiles);
     expect(loaded).toHaveLength(3);
 
-    // Guia para IA embutido em .mente/ (nunca vira nota).
-    const guide = files.find((file) => file.path === '.mente/AGENTES.md');
+    // Guia para IA embutido em .novamente/ (nunca vira nota).
+    const guide = files.find((file) => file.path === '.novamente/AGENTES.md');
     expect(guide?.markdown).toContain('instruções para IA');
-    expect(loaded.some((note) => note.title.includes('Vault do MENTE'))).toBe(false);
+    expect(loaded.some((note) => note.title.includes('Vault do Novamente'))).toBe(false);
 
     const app = loaded.find((note) => note.id === 'note-app');
     const pwa = loaded.find((note) => note.id === 'note-pwa');
@@ -74,9 +89,7 @@ describe('vault', () => {
         ...base[2],
         content: {
           type: 'doc',
-          content: [
-            { type: 'paragraph', content: [{ type: 'text', text: 'atualizado pela IA' }] },
-          ],
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'atualizado pela IA' }] }],
         },
         contentText: 'atualizado pela IA',
         updatedAt: (base[2]?.updatedAt ?? 0) + 1000,
@@ -97,7 +110,9 @@ describe('vault', () => {
 
   it('merge com updatedAt menor preserva o base (LWW)', () => {
     const base = [makeNote({ id: 'n1', title: 'Base', updatedAt: 100, contentText: 'base' })];
-    const incoming = [makeNote({ id: 'n1', title: 'Antigo', updatedAt: 50, contentText: 'antigo' })];
+    const incoming = [
+      makeNote({ id: 'n1', title: 'Antigo', updatedAt: 50, contentText: 'antigo' }),
+    ];
     const merged = mergeVaultNotes(base, incoming, { now: 200 });
     expect(merged.notes[0]?.title).toBe('Base');
     expect(merged.unchanged).toContain('n1');
@@ -105,7 +120,7 @@ describe('vault', () => {
 
   it('notesToBackup gera links a partir dos wikilinks', () => {
     const backup = notesToBackup(sampleGraph());
-    expect(backup.format).toBe('mente-backup');
+    expect(backup.format).toBe('novamente-backup');
     expect(backup.data.notes).toHaveLength(3);
     expect(backup.data.links.length).toBeGreaterThan(0);
     expect(backup.data.links[0]?.toId).toBe('note-app');
@@ -145,7 +160,7 @@ describe('vault', () => {
   it('formatTree imprime a hierarquia', () => {
     const tree = formatTree(sampleGraph());
     expect(tree).toContain('Projetos');
-    expect(tree).toContain('App Mente');
+    expect(tree).toContain('App Novamente');
     expect(tree).toContain('Fase 7 PWA');
     expect(tree).toContain('[pendente]');
   });
@@ -157,7 +172,7 @@ describe('vault', () => {
     const merged = mergeVaultNotes(notes, loaded);
     const pwa = merged.notes.find((note) => note.id === 'note-pwa');
     expect(pwa?.content).not.toEqual(EMPTY_DOC);
-    expect(pwa?.contentText).toContain('App Mente');
+    expect(pwa?.contentText).toContain('App Novamente');
   });
 
   it('loadVaultNotes com base herda campos de frontmatter mínimo', () => {

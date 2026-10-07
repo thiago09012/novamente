@@ -1,9 +1,9 @@
 #!/usr/bin/env tsx
 /**
- * CLI de notas e contexto do Neuronow; o nome de arquivo legado é mantido.
+ * CLI de notas e contexto do Novamente; o nome de arquivo legado é mantido.
  * Opera sobre vault markdown e backups JSON usando só o domain/.
  *
- * npm run mente -- help
+ * npm run novamente -- help
  */
 import {
   existsSync,
@@ -78,7 +78,7 @@ function loadBackup(path: string): BackupFile {
 function walkVaultFiles(root: string, prefix = ''): MarkdownFile[] {
   const files: MarkdownFile[] = [];
   for (const entry of readdirSync(root)) {
-    if (entry === '.mente') continue;
+    if (entry === '.novamente' || entry === '.mente') continue;
     const full = join(root, entry);
     const rel = prefix ? `${prefix}/${entry}` : entry;
     if (statSync(full).isDirectory()) files.push(...walkVaultFiles(full, rel));
@@ -102,11 +102,16 @@ function loadNotesFromVault(vaultDir: string, args?: Args): Note[] {
 
 function loadVaultOperationBase(vaultDir: string, args?: Args): Note[] | undefined {
   if (readProjectScope(vaultDir)) {
-    return loadBackup(join(vaultDir, '.mente', 'base.json')).data.notes;
+    return loadBackup(metadataPath(vaultDir, 'base.json')).data.notes;
   }
   return args && typeof args.flags.base === 'string'
     ? loadBackup(resolve(args.flags.base)).data.notes
     : undefined;
+}
+
+function metadataPath(vaultDir: string, fileName: string): string {
+  const current = join(vaultDir, '.novamente', fileName);
+  return existsSync(current) ? current : join(vaultDir, '.mente', fileName);
 }
 
 function saveNotesToVault(vaultDir: string, notes: readonly Note[]): void {
@@ -118,10 +123,10 @@ function saveNotesToVault(vaultDir: string, notes: readonly Note[]): void {
     }
   }
   writeVaultFiles(vaultDir, files);
-  mkdirSync(join(vaultDir, '.mente'), { recursive: true });
+  mkdirSync(join(vaultDir, '.novamente'), { recursive: true });
   const manifest = exportVault(notes).manifest;
   writeFileSync(
-    join(vaultDir, '.mente', 'manifest.json'),
+    join(vaultDir, '.novamente', 'manifest.json'),
     JSON.stringify(manifest, null, 2),
     'utf8',
   );
@@ -153,7 +158,7 @@ function parseTags(raw: string | boolean | undefined): string[] {
 }
 
 interface ProjectScope {
-  format: 'neuronow-ai-scope';
+  format: 'novamente-ai-scope';
   version: 1;
   rootId: string;
   rootTitle: string;
@@ -197,14 +202,16 @@ function makeProjectBase(
 }
 
 function readProjectScope(vaultDir: string): ProjectScope | null {
-  const path = join(vaultDir, '.mente', 'scope.json');
+  const path = metadataPath(vaultDir, 'scope.json');
   if (!existsSync(path)) return null;
   const raw: unknown = readJson(path);
   if (
     typeof raw !== 'object' ||
     raw === null ||
     Array.isArray(raw) ||
-    (raw as Record<string, unknown>).format !== 'neuronow-ai-scope' ||
+    !['novamente-ai-scope', 'neuronow-ai-scope'].includes(
+      String((raw as Record<string, unknown>).format),
+    ) ||
     (raw as Record<string, unknown>).version !== 1 ||
     typeof (raw as Record<string, unknown>).rootId !== 'string' ||
     typeof (raw as Record<string, unknown>).rootTitle !== 'string'
@@ -333,7 +340,7 @@ function createReviewReport(
       : 'Escopo: vault completo',
     `Resumo: ${created.length} criadas · ${updated.length} atualizadas · ${conflicts.length} conflitos mantidos na versão mais recente do app · ${unchanged} sem alteração · ${kept} preservadas fora do vault.`,
     '',
-    'O pacote JSON ainda precisa ser revisado e importado manualmente no Neuronow. Notas ausentes do vault não são apagadas.',
+    'O pacote JSON ainda precisa ser revisado e importado manualmente no Novamente. Notas ausentes do vault não são apagadas.',
     '',
     section('Criadas', created),
     section('Atualizadas', updated),
@@ -461,7 +468,7 @@ function aiContextPayload(
   });
 
   const createPayload = () => ({
-    format: 'neuronow-ai-context',
+    format: 'novamente-ai-context',
     version: 1,
     query,
     instructions: [
@@ -503,13 +510,13 @@ function aiContextPayload(
 }
 
 function printHelp(): void {
-  console.log(`Neuronow — notas de projetos para trabalhar com IA
+  console.log(`Novamente — notas de projetos para trabalhar com IA
 
 Comandos:
-  ai:prepare   --input backup.json --out ./neuronow-vault [--root "Projeto"]
+  ai:prepare   --input backup.json --out ./novamente-vault [--root "Projeto"]
   ai:context   "consulta" [--vault DIR | --backup FILE] [--root "Projeto"] [--budget 3000]
               [--limit 8] [--related 4]
-  ai:package   --vault ./neuronow-vault --out merged.json [--base backup.json]
+  ai:package   --vault ./novamente-vault --out merged.json [--base backup.json]
               [--root "Projeto"] [--report ./revisao.md]
   vault:export  --input backup.json --out ./vault
   vault:import  --vault ./vault --out merged.json --base backup.json
@@ -576,25 +583,29 @@ function main(): void {
     const { manifest } = exportVault(preparedNotes);
     mkdirSync(out, { recursive: true });
     saveNotesToVault(out, preparedNotes);
-    mkdirSync(join(out, '.mente'), { recursive: true });
+    mkdirSync(join(out, '.novamente'), { recursive: true });
     const storedBase = root ? makeProjectBase(backup, preparedNotes, root) : backup;
-    writeFileSync(join(out, '.mente', 'base.json'), JSON.stringify(storedBase, null, 2), 'utf8');
+    writeFileSync(
+      join(out, '.novamente', 'base.json'),
+      JSON.stringify(storedBase, null, 2),
+      'utf8',
+    );
     if (root) {
       const scope: ProjectScope = {
-        format: 'neuronow-ai-scope',
+        format: 'novamente-ai-scope',
         version: 1,
         rootId: root.id,
         rootTitle: root.title,
         exportedAt: backup.exportedAt,
       };
-      writeFileSync(join(out, '.mente', 'scope.json'), JSON.stringify(scope, null, 2), 'utf8');
+      writeFileSync(join(out, '.novamente', 'scope.json'), JSON.stringify(scope, null, 2), 'utf8');
     } else {
-      rmSync(join(out, '.mente', 'scope.json'), { force: true });
+      rmSync(join(out, '.novamente', 'scope.json'), { force: true });
     }
     console.log(`Workspace da IA preparado: ${out}`);
     console.log(`Notas: ${manifest.notes.length}. Escopo: ${root?.title ?? 'vault completo'}.`);
     console.log(
-      `Base preservada em .mente/base.json${root ? ' (somente o projeto selecionado)' : ''}.`,
+      `Base preservada em .novamente/base.json${root ? ' (somente o projeto selecionado)' : ''}.`,
     );
     return;
   }
@@ -616,9 +627,9 @@ function main(): void {
     const basePath =
       typeof args.flags.base === 'string'
         ? resolve(args.flags.base)
-        : join(vaultDir, '.mente', 'base.json');
+        : metadataPath(vaultDir, 'base.json');
     const base = loadBackup(basePath);
-    const snapshotPath = join(vaultDir, '.mente', 'base.json');
+    const snapshotPath = metadataPath(vaultDir, 'base.json');
     const snapshot = existsSync(snapshotPath) ? loadBackup(snapshotPath) : base;
     const vaultNotes = loadVaultNotes(walkVaultFiles(vaultDir), { base: snapshot.data.notes });
     const root =
@@ -641,7 +652,7 @@ function main(): void {
     const reportPath =
       typeof args.flags.report === 'string'
         ? resolve(args.flags.report)
-        : join(vaultDir, '.mente', 'review.md');
+        : join(vaultDir, '.novamente', 'review.md');
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(
       reportPath,
@@ -661,7 +672,7 @@ function main(): void {
       args.positional.join(' ').trim() ||
       (typeof args.flags.query === 'string' ? args.flags.query : '');
     if (!query)
-      throw new Error('Informe uma consulta: neuronow ai:context "prazo do projeto" --vault DIR');
+      throw new Error('Informe uma consulta: novamente ai:context "prazo do projeto" --vault DIR');
     const sourceNotes = notesFromArgs(args);
     const rootSelector = typeof args.flags.root === 'string' ? args.flags.root : null;
     const roots = sourceNotes.filter((note) => note.parentId === null && isAlive(note));
@@ -713,7 +724,7 @@ function main(): void {
     const query =
       args.positional.join(' ').trim() ||
       (typeof args.flags.query === 'string' ? args.flags.query : '');
-    if (!query) throw new Error('Informe a busca: mente search "termo"');
+    if (!query) throw new Error('Informe a busca: novamente search "termo"');
     const notes = notesFromArgs(args);
     const hits = searchNotes(notes, query, {
       limit: args.flags.limit !== undefined ? Number(args.flags.limit) : 20,
@@ -833,7 +844,7 @@ function main(): void {
 
   if (args.command === 'manifest') {
     const vaultDir = resolve(requireFlag(args, 'vault'));
-    const manifest = parseManifest(readJson(join(vaultDir, '.mente', 'manifest.json')));
+    const manifest = parseManifest(readJson(metadataPath(vaultDir, 'manifest.json')));
     console.log(
       `format=${manifest.format} version=${manifest.version} notes=${manifest.notes.length}`,
     );
@@ -841,7 +852,7 @@ function main(): void {
     return;
   }
 
-  throw new Error(`Comando desconhecido: ${args.command}. Use "mente help".`);
+  throw new Error(`Comando desconhecido: ${args.command}. Use "novamente help".`);
 }
 
 try {

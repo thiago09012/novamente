@@ -34,6 +34,7 @@ UI (features/, components/)
 ```
 
 - **Nada derivado é persistido** (contagens, caminhos, `childIds`).
+- **Princípio tree-first:** toda feature nova mora na árvore — `parentId` + `orderKey` (fractional indexing), categorias são raízes (`parentId: null`), ordem sempre por `orderKey`. Ler/escrever via `src/domain/tree.ts` e `src/domain/order.ts`; IDs ULID. Ver decisão permanente em `docs/DECISIONS.md` §10.
 - Escritas otimistas com rollback em erro e toast "Não foi possível salvar. Tente de novo."
 - Preferências (`Settings`) e notas (`Note`) vivem em tabelas separadas.
 

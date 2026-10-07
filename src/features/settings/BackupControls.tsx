@@ -65,7 +65,7 @@ export function BackupControls() {
       const backup = await runtime().exportBackup();
       downloadFile(
         JSON.stringify(backup, null, 2),
-        `neuronow-backup-${new Date().toISOString().slice(0, 10)}.json`,
+        `novamente-backup-${new Date().toISOString().slice(0, 10)}.json`,
         'application/json',
       );
       setStatus(t('settings.backupExportado'));
@@ -88,7 +88,7 @@ export function BackupControls() {
       const context = exportProjectContext(backup.data.notes, activeCategoryId, backup.exportedAt);
       downloadFile(
         context,
-        `neuronow-context-${slugify(root.title)}-${new Date().toISOString().slice(0, 10)}.md`,
+        `novamente-context-${slugify(root.title)}-${new Date().toISOString().slice(0, 10)}.md`,
         'text/markdown',
       );
       setStatus(t('settings.aiContextExportado'));
@@ -107,9 +107,9 @@ export function BackupControls() {
       const backup = await runtime().exportBackup();
       const date = new Date().toISOString().slice(0, 10);
       if (format === 'markdown') {
-        downloadFile(exportMarkdown(backup.data.notes), `neuronow-${date}.md`, 'text/markdown');
+        downloadFile(exportMarkdown(backup.data.notes), `novamente-${date}.md`, 'text/markdown');
       } else {
-        downloadFile(exportOpml(backup.data.notes), `neuronow-${date}.opml`, 'text/xml');
+        downloadFile(exportOpml(backup.data.notes), `novamente-${date}.opml`, 'text/xml');
       }
       setStatus(t('settings.backupExportado'));
     } catch {
@@ -282,51 +282,61 @@ export function BackupControls() {
           ) : null}
         </div>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <Button
-          size="sm"
-          icon={<Icon name="download" size={14} />}
-          disabled={busy}
-          onClick={() => void exportJson()}
-        >
-          {t('settings.exportarJson')}
-        </Button>
-        <Button
-          size="sm"
-          icon={<Icon name="file-text" size={14} />}
-          disabled={busy}
-          onClick={() => void exportText('markdown')}
-        >
-          {t('settings.exportarMarkdown')}
-        </Button>
-        <Button
-          size="sm"
-          icon={<Icon name="list-tree" size={14} />}
-          disabled={busy}
-          onClick={() => void exportText('opml')}
-        >
-          {t('settings.exportarOpml')}
-        </Button>
-        <Button
-          size="sm"
-          icon={<Icon name="upload" size={14} />}
-          disabled={busy}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {t('settings.importarArquivo')}
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="application/json,.json,text/markdown,.md,.markdown,text/xml,.opml"
-          aria-label={t('settings.importarArquivo')}
-          className="sr-only"
-          onChange={(event) => {
-            void selectFile(event.currentTarget.files?.[0]);
-            event.currentTarget.value = '';
-          }}
-        />
-      </div>
+      <section className="flex flex-col gap-2">
+        <h3 className="text-sm font-semibold text-text">{t('settings.exportacoes')}</h3>
+        <p className="text-xs leading-relaxed text-muted">{t('settings.exportacoesAjuda')}</p>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            icon={<Icon name="download" size={14} />}
+            disabled={busy}
+            onClick={() => void exportJson()}
+          >
+            {t('settings.exportarJson')}
+          </Button>
+          <Button
+            size="sm"
+            icon={<Icon name="file-text" size={14} />}
+            disabled={busy}
+            onClick={() => void exportText('markdown')}
+          >
+            {t('settings.exportarMarkdown')}
+          </Button>
+          <Button
+            size="sm"
+            icon={<Icon name="list-tree" size={14} />}
+            disabled={busy}
+            onClick={() => void exportText('opml')}
+          >
+            {t('settings.exportarOpml')}
+          </Button>
+        </div>
+      </section>
+      <section className="flex flex-col gap-2 border-t border-border pt-4">
+        <h3 className="text-sm font-semibold text-text">{t('settings.importacoes')}</h3>
+        <p className="text-xs leading-relaxed text-muted">{t('settings.importacoesAjuda')}</p>
+        <div>
+          <Button
+            size="sm"
+            icon={<Icon name="upload" size={14} />}
+            disabled={busy}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {t('settings.importarArquivo')}
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json,text/markdown,.md,.markdown,text/xml,.opml"
+            aria-label={t('settings.importarArquivo')}
+            className="sr-only"
+            onChange={(event) => {
+              void selectFile(event.currentTarget.files?.[0]);
+              event.currentTarget.value = '';
+            }}
+          />
+        </div>
+      </section>
       {status ? (
         <p role="status" className="text-xs text-accent">
           {status}

@@ -1,4 +1,4 @@
-# Neuronow
+# Novamente
 
 [![CI](https://github.com/thiago09012/novamente/actions/workflows/ci.yml/badge.svg)](https://github.com/thiago09012/novamente/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -6,7 +6,7 @@
 
 _Versão em português: [README.pt-BR.md](README.pt-BR.md) · [Live demo](https://novamente-smoky.vercel.app)_
 
-**Local-first project notes, ready to work with AI.** Neuronow organizes notes
+**Local-first project notes, ready to work with AI.** Novamente organizes notes
 in a navigable tree (categories → notes → subnotes) with a rich editor,
 `[[wikilinks]]`, instant search and a visual canvas. It runs in the browser
 with no account or connection; an optional Supabase account keeps private
@@ -18,7 +18,7 @@ copies.
 - **UI in Brazilian Portuguese (pt-BR)**, dark theme by default.
 - **Built for humans and AIs**: export a project's context, search connected
   notes and review AI-suggested changes — or give an agent direct access
-  through the bundled **MCP server** (see [Neuronow for AIs](#neuronow-for-ais)).
+  through the bundled **MCP server** (see [Novamente for AIs](#novamente-for-ais)).
 
 ![Canvas with wikilink edges between notes](docs/images/canvas.png)
 ![Editor with headings and clickable wikilink chips](docs/images/editor.png)
@@ -61,29 +61,28 @@ npm run dev                      # http://localhost:5173
 
 ## Commands
 
-| Command                 | What it does                                                 |
-| ----------------------- | ------------------------------------------------------------ |
-| `npm run dev`           | Dev server (Vite, port 5173)                                 |
-| `npm run build`         | Contrast test + typecheck + production build into `dist/`    |
-| `npm run preview`       | Serve `dist/` (port 4173 in e2e)                             |
-| `npm run test`          | Unit tests (Vitest, co-located in `src/**/*.test.ts`)        |
-| `npm run test:watch`    | Tests in watch mode                                          |
-| `npm run test:contrast` | WCAG AA contrast only (`src/styles`) — runs before the build |
-| `npm run test:coverage` | Coverage (80% thresholds on `domain/` and `db/`)             |
-| `npm run typecheck`     | `tsc -b` (strict)                                            |
-| `npm run lint`          | ESLint (type-checked)                                        |
-| `npm run format`        | Prettier across the repo                                     |
-| `npm run e2e`           | Playwright tests (`e2e/`, Chromium)                          |
-| `npm run perf:stress`   | Stress e2e (5,000 notes, build + preview)                    |
-| `npm run seed:stress`   | Generate an N-note seed JSON (never touches the database)    |
-| `npm run neuronow`      | AI context and vault CLI (`npm run neuronow -- help`)        |
-| `npm run mente`         | Compatibility alias for the old CLI name                     |
-| `npm run mcp`           | Local MCP stdio server                                       |
-| `npm run mente:connect` | Interactive MCP client setup wizard                          |
+| Command                     | What it does                                                 |
+| --------------------------- | ------------------------------------------------------------ |
+| `npm run dev`               | Dev server (Vite, port 5173)                                 |
+| `npm run build`             | Contrast test + typecheck + production build into `dist/`    |
+| `npm run preview`           | Serve `dist/` (port 4173 in e2e)                             |
+| `npm run test`              | Unit tests (Vitest, co-located in `src/**/*.test.ts`)        |
+| `npm run test:watch`        | Tests in watch mode                                          |
+| `npm run test:contrast`     | WCAG AA contrast only (`src/styles`) — runs before the build |
+| `npm run test:coverage`     | Coverage (80% thresholds on `domain/` and `db/`)             |
+| `npm run typecheck`         | `tsc -b` (strict)                                            |
+| `npm run lint`              | ESLint (type-checked)                                        |
+| `npm run format`            | Prettier across the repo                                     |
+| `npm run e2e`               | Playwright tests (`e2e/`, Chromium)                          |
+| `npm run perf:stress`       | Stress e2e (5,000 notes, build + preview)                    |
+| `npm run seed:stress`       | Generate an N-note seed JSON (never touches the database)    |
+| `npm run novamente`         | AI context and vault CLI (`npm run novamente -- help`)       |
+| `npm run mcp`               | Local MCP stdio server                                       |
+| `npm run novamente:connect` | Interactive MCP client setup wizard                          |
 
-## Neuronow for AIs
+## Novamente for AIs
 
-Neuronow exposes a **Markdown vault**: a backup becomes a folder of `.md`
+Novamente exposes a **Markdown vault**: a backup becomes a folder of `.md`
 files any AI can read and edit with any tooling (coding agents, editors,
 scripts). Changes return to the app through **smart merge**.
 
@@ -95,20 +94,20 @@ scripts). Changes return to the app through **smart merge**.
    frontmatter with stable IDs and `[[wikilinks]]`. After syncing, edits made
    in the app are written to the Markdown files first.
 3. After the AI edits the files, sync again in the app. It imports the
-   changes, writes the consolidated version and creates `.mente/review.md`;
-   divergent versions are preserved under `.mente/conflicts/`.
+   changes, writes the consolidated version and creates `.novamente/review.md`;
+   divergent versions are preserved under `.novamente/conflicts/`.
 4. Keep a child note `Resumo do projeto` with goal, state, decisions, pending
    items, risks and next step.
 
 ### MCP server (direct agent access)
 
-`scripts/mcp-server.ts` speaks MCP over stdio with 8 tools (`mente_tree`,
-`mente_search`, `mente_read`, `mente_create`, `mente_move`, `mente_tag`,
-`mente_prepare`, `mente_package`) operating on the vault folder. Register it
+`scripts/mcp-server.ts` speaks MCP over stdio with 8 tools (`novamente_tree`,
+`novamente_search`, `novamente_read`, `novamente_create`, `novamente_move`, `novamente_tag`,
+`novamente_prepare`, `novamente_package`) operating on the vault folder. Register it
 in any MCP client:
 
 ```bash
-npm run mente:connect -- --ide cursor --scope global --dry-run  # preview first
+npm run novamente:connect -- --ide cursor --scope global --dry-run  # preview first
 ```
 
 Supported clients: Antigravity, Cursor, VS Code, Claude Desktop, Windsurf,
@@ -123,33 +122,33 @@ app remains the round-trip. Full agent handoff:
 # 1) In the app: Settings → Data → export the JSON backup
 
 # 2) Prepare only the project the AI will work on
-npm run neuronow -- ai:prepare --input backup.json --out ./neuronow-vault --root "Project X"
+npm run novamente -- ai:prepare --input backup.json --out ./novamente-vault --root "Project X"
 
 # 3) Search facts with an approximate token budget
-npm run neuronow -- ai:context "deadlines and next steps" --vault ./neuronow-vault --budget 1800
+npm run novamente -- ai:context "deadlines and next steps" --vault ./novamente-vault --budget 1800
 
 # 4) The AI can read/edit .md directly or use the vault commands
-npm run neuronow -- tree --vault ./neuronow-vault
-npm run neuronow -- read --path path/note.md --vault ./neuronow-vault
-npm run neuronow -- create --parent "Project X" --title "New note" \
-                   --tags ai,review --body "content" --vault ./neuronow-vault
+npm run novamente -- tree --vault ./novamente-vault
+npm run novamente -- read --path path/note.md --vault ./novamente-vault
+npm run novamente -- create --parent "Project X" --title "New note" \
+                   --tags ai,review --body "content" --vault ./novamente-vault
 
 # 5) Export an updated backup and package with scope review
-npm run neuronow -- ai:package --vault ./neuronow-vault --base current-backup.json \
-                   --root "Project X" --out neuronow-merged.json
+npm run novamente -- ai:package --vault ./novamente-vault --base current-backup.json \
+                   --root "Project X" --out novamente-merged.json
 
-# 6) Review .mente/review.md and import the JSON in the app
+# 6) Review .novamente/review.md and import the JSON in the app
 ```
 
 The app also offers **Export active project context for AI** in Settings →
 Data. It includes only the active category and descendants, with IDs and
 paths so the AI can cite sources.
 
-The scoped vault includes `.mente/AGENTES.md`, `.mente/manifest.json` and a
-`.mente/base.json` holding only the selected project. When packaging, pass a
+The scoped vault includes `.novamente/AGENTES.md`, `.novamente/manifest.json` and a
+`.novamente/base.json` holding only the selected project. When packaging, pass a
 fresh full backup in `--base`; the CLI preserves the remaining notes and
-rejects out-of-scope changes. The report lands in `.mente/review.md`.
-`mente-vault/` and `neuronow-vault/` are git-ignored so personal notes are
+rejects out-of-scope changes. The report lands in `.novamente/review.md`.
+`novamente-vault/` is git-ignored so personal notes are
 never published.
 
 IndexedDB stays the local cache used by the UI; after syncing, app writes go
@@ -173,13 +172,13 @@ wrong project.
   app).
 - **Per-note LWW**: on conflict, the higher (or equal) `updatedAt` wins.
   Re-export the vault before editing so your edit wins.
-- **`.mente/base.json` inheritance**: if frontmatter is rewritten minimally
+- **`.novamente/base.json` inheritance**: if frontmatter is rewritten minimally
   (only `id`), missing fields (`tags`, `icon`, `color`, `orderKey`, dates)
   are inherited from the snapshot used to prepare the vault. In `ai:package`,
   `--base` may point at the latest full backup to detect conflicts.
 - **Automatic repair**: orphans, cycles and invalid content are normalized on
   import; the app also repairs on boot.
-- **Full-fidelity format** stays **JSON** (`mente-backup` v1); the Markdown
+- **Full-fidelity format** stays **JSON** (`novamente-backup` v1); the Markdown
   vault is the editing layer. Markdown conversion does not represent every
   rich-editor feature; keep the original backup.
 
@@ -208,12 +207,12 @@ path only applies when `parentId` is absent.
 ### CLI reference
 
 ```bash
-npm run neuronow -- help
+npm run novamente -- help
 ```
 
 Commands: `ai:prepare`, `ai:context`, `ai:package`, `vault:export`,
 `vault:import`, `search`, `read`, `tree`, `create`, `move`, `tag`,
-`manifest`, `help`. Implementation: `scripts/mente.ts` (only `src/domain/`),
+`manifest`, `help`. Implementation: `scripts/novamente.ts` (only `src/domain/`),
 codec in `src/domain/markdown.ts`, vault graph in `src/domain/vault.ts`, MCP
 server in `scripts/mcp-server.ts`.
 
@@ -230,11 +229,11 @@ Pure rules: src/domain/ (no React, no Dexie) — tree, order, links,
   `features/` (sidebar, canvas, editor, search, trash, settings, help,
   pickers) · `store/` (Zustand) · `app/` (bootstrap and layout) ·
   `components/ui/` (primitives) · `i18n/` (pt-BR) · `styles/` (theme tokens).
-- **`mente` database** (Dexie): `notes`, `links`, `settings`, `views`, `meta`.
+- **`novamente` database** (Dexie): `notes`, `links`, `settings`, `views`, `meta`.
   ULID ids, fractional-indexing order (`orderKey`), trash with
   `deletedAt`/`deletedRootId`.
-- **Cross-tab sync**: BroadcastChannel `mente-database-sync-v1`.
-- **JSON backup** (`mente-backup` v1): `parseBackup` validates format,
+- **Cross-tab sync**: BroadcastChannel `novamente-database-sync-v1`.
+- **JSON backup** (`novamente-backup` v1): `parseBackup` validates format,
   schemas, references and cycles before any write; import is one atomic
   transaction (clear + bulkPut + repair) followed by a page reload.
 
@@ -255,14 +254,14 @@ src/
   styles/        theme tokens + global (Tailwind v4) + contrast test
   tests/         test setup and factories
 e2e/             13 Playwright specs (backup, tree, search, sync, axe, ...)
-scripts/         mente.ts (CLI), mcp-server.ts (MCP), mente-connect.ts (setup), seed-stress.ts
+scripts/         novamente.ts (CLI), mcp-server.ts (MCP), novamente-connect.ts (setup), seed-stress.ts
 docs/            ARCHITECTURE, SHORTCUTS, HANDOFF, PLAN, DECISIONS, AI_PLAYBOOK
 ```
 
 ## Tests
 
 - **Unit** (Vitest + Testing Library): co-located in `src/`,
-  `fake-indexeddb` for the `db/` layer. Today: **205 tests in 25 files**.
+  `fake-indexeddb` for the `db/` layer. Today: **209 tests in 25 files**.
 - **Contrast** (77 WCAG AA assertions): runs as `prebuild` — the build fails
   if the theme regresses.
 - **E2e** (Playwright, Chromium, pt-BR): 13 specs covering tree CRUD, search,
@@ -280,16 +279,16 @@ Full table: [`docs/SHORTCUTS.md`](docs/SHORTCUTS.md).
 
 ## Documentation
 
-| File                                               | Contents                               |
-| -------------------------------------------------- | -------------------------------------- |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)     | Architecture and data model            |
-| [`docs/AI_PLAYBOOK.md`](docs/AI_PLAYBOOK.md)       | Detailed handoff for agents and MCP    |
-| [`docs/SHORTCUTS.md`](docs/SHORTCUTS.md)           | Every keyboard shortcut                |
-| [`docs/HANDOFF.md`](docs/HANDOFF.md)               | Technical handoff (env, conventions)   |
-| [`docs/PLAN.md`](docs/PLAN.md)                     | Phase plan and status                  |
-| [`docs/DECISIONS.md`](docs/DECISIONS.md)           | Technical decision log                 |
-| [`prompt-mestre-mente.md`](prompt-mestre-mente.md) | Original product specification (pt-BR) |
-| [`AGENTS.md`](AGENTS.md)                           | Operator guide for AIs                 |
+| File                                                       | Contents                               |
+| ---------------------------------------------------------- | -------------------------------------- |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)             | Architecture and data model            |
+| [`docs/AI_PLAYBOOK.md`](docs/AI_PLAYBOOK.md)               | Detailed handoff for agents and MCP    |
+| [`docs/SHORTCUTS.md`](docs/SHORTCUTS.md)                   | Every keyboard shortcut                |
+| [`docs/HANDOFF.md`](docs/HANDOFF.md)                       | Technical handoff (env, conventions)   |
+| [`docs/PLAN.md`](docs/PLAN.md)                             | Phase plan and status                  |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md)                   | Technical decision log                 |
+| [`prompt-mestre-novamente.md`](prompt-mestre-novamente.md) | Original product specification (pt-BR) |
+| [`AGENTS.md`](AGENTS.md)                                   | Operator guide for AIs                 |
 
 ## Status
 

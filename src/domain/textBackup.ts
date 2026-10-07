@@ -24,23 +24,24 @@ function aliveTree(notes: readonly Note[]): Map<ID | null, Note[]> {
     bucket.push(note);
     children.set(note.parentId, bucket);
   }
-  for (const bucket of children.values()) bucket.sort((a, b) => a.orderKey.localeCompare(b.orderKey));
+  for (const bucket of children.values())
+    bucket.sort((a, b) => a.orderKey.localeCompare(b.orderKey));
   return children;
 }
 
 function escapeMarkdownLine(line: string): string {
-  if (/^\s*(?:#{1,6}\s|<!-- mente:)/u.test(line)) return `\\${line}`;
+  if (/^\s*(?:#{1,6}\s|<!-- (?:novamente|mente):)/u.test(line)) return `\\${line}`;
   return line;
 }
 
 export function exportMarkdown(notes: readonly Note[]): string {
   const children = aliveTree(notes);
-  const lines = ['<!-- Neuronow Markdown exchange v1 -->'];
+  const lines = ['<!-- Novamente Markdown exchange v1 -->'];
   const write = (siblings: Note[], depth: number) => {
     for (const note of siblings) {
       const headingLevel = Math.min(depth + 1, 6);
-      lines.push(`<!-- mente:depth=${depth} -->`);
-      lines.push(`<!-- mente:tags=${JSON.stringify(note.tags)} -->`);
+      lines.push(`<!-- novamente:depth=${depth} -->`);
+      lines.push(`<!-- novamente:tags=${JSON.stringify(note.tags)} -->`);
       lines.push(`${'#'.repeat(headingLevel)} ${note.title.replace(/[\r\n]+/gu, ' ')}`);
       const body = note.contentText.split('\n').map(escapeMarkdownLine);
       if (body.some((line) => line.length > 0)) lines.push('', ...body);
@@ -67,16 +68,14 @@ export function exportOpml(notes: readonly Note[]): string {
       .map((note) => {
         const attributes = [
           `text="${escapeXml(note.title)}"`,
-          `mente:content="${escapeXml(JSON.stringify(note.contentText))}"`,
-          `mente:tags="${escapeXml(JSON.stringify(note.tags))}"`,
+          `novamente:content="${escapeXml(JSON.stringify(note.contentText))}"`,
+          `novamente:tags="${escapeXml(JSON.stringify(note.tags))}"`,
         ].join(' ');
         const nested = write(children.get(note.id) ?? []);
-        return nested
-          ? `<outline ${attributes}>${nested}</outline>`
-          : `<outline ${attributes} />`;
+        return nested ? `<outline ${attributes}>${nested}</outline>` : `<outline ${attributes} />`;
       })
       .join('');
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<opml version="2.0" xmlns:mente="urn:mente:exchange:v1"><head><title>Neuronow</title></head><body>${write(children.get(null) ?? [])}</body></opml>\n`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<opml version="2.0" xmlns:novamente="urn:novamente:exchange:v1"><head><title>Novamente</title></head><body>${write(children.get(null) ?? [])}</body></opml>\n`;
 }
 
 function parseMarkdown(text: string): OutlineEntry[] {
@@ -86,22 +85,25 @@ function parseMarkdown(text: string): OutlineEntry[] {
   let nextTags: string[] = [];
 
   for (const rawLine of text.replace(/\r\n?/gu, '\n').split('\n')) {
-    const depthMarker = rawLine.match(/^\s*<!-- mente:depth=(\d+) -->\s*$/u);
+    const depthMarker = rawLine.match(/^\s*<!-- (?:novamente|mente):depth=(\d+) -->\s*$/u);
     if (depthMarker) {
       nextDepth = Number(depthMarker[1]);
       continue;
     }
-    const tagsMarker = rawLine.match(/^\s*<!-- mente:tags=(.*?) -->\s*$/u);
+    const tagsMarker = rawLine.match(/^\s*<!-- (?:novamente|mente):tags=(.*?) -->\s*$/u);
     if (tagsMarker) {
       try {
         const parsed: unknown = JSON.parse(tagsMarker[1]);
-        nextTags = Array.isArray(parsed) ? parsed.filter((tag): tag is string => typeof tag === 'string') : [];
+        nextTags = Array.isArray(parsed)
+          ? parsed.filter((tag): tag is string => typeof tag === 'string')
+          : [];
       } catch {
         nextTags = [];
       }
       continue;
     }
-    if (/^\s*<!-- (?:MENTE|Neuronow) Markdown exchange/u.test(rawLine)) continue;
+    if (/^\s*<!-- (?:NOVAMENTE|Novamente|MENTE|Neuronow) Markdown exchange/u.test(rawLine))
+      continue;
 
     const heading = rawLine.match(/^\s*(#{1,6})\s+(.+?)\s*#*\s*$/u);
     if (heading) {
@@ -124,7 +126,7 @@ function parseMarkdown(text: string): OutlineEntry[] {
     }
 
     if (stack.length > 0) {
-      const line = rawLine.replace(/^\\(?=\s*(?:#{1,6}\s|<!-- mente:))/u, '');
+      const line = rawLine.replace(/^\\(?=\s*(?:#{1,6}\s|<!-- (?:novamente|mente):))/u, '');
       stack[stack.length - 1].body.push(line);
     } else if (rawLine.trim()) {
       roots.push({ title: 'Importado', body: [rawLine], tags: [], children: [], depth: 0 });
@@ -136,7 +138,8 @@ function parseMarkdown(text: string): OutlineEntry[] {
 }
 
 function parseOpml(text: string): OutlineEntry[] {
-  if (typeof DOMParser === 'undefined') throw new Error('Importação OPML indisponível neste ambiente.');
+  if (typeof DOMParser === 'undefined')
+    throw new Error('Importação OPML indisponível neste ambiente.');
   const document = new DOMParser().parseFromString(text, 'application/xml');
   if (document.querySelector('parsererror') || document.documentElement.localName !== 'opml') {
     throw new Error('Arquivo OPML inválido.');
@@ -150,7 +153,7 @@ function parseOpml(text: string): OutlineEntry[] {
       const parsed: unknown = JSON.parse(value);
       if (typeof parsed === 'string') return parsed;
     } catch {
-      // OPML externo pode trazer texto simples em `mente:content`.
+      // OPML externo pode trazer texto simples em `novamente:content`.
     }
     return value;
   };
@@ -161,14 +164,21 @@ function parseOpml(text: string): OutlineEntry[] {
       .map((element) => {
         let tags: string[] = [];
         try {
-          const parsed: unknown = JSON.parse(element.getAttribute('mente:tags') ?? '[]');
-          if (Array.isArray(parsed)) tags = normalizeTags(parsed.filter((tag): tag is string => typeof tag === 'string'));
+          const parsed: unknown = JSON.parse(
+            element.getAttribute('novamente:tags') ?? element.getAttribute('mente:tags') ?? '[]',
+          );
+          if (Array.isArray(parsed))
+            tags = normalizeTags(parsed.filter((tag): tag is string => typeof tag === 'string'));
         } catch {
           tags = [];
         }
         return {
           title: element.getAttribute('text') ?? element.getAttribute('title') ?? '',
-          body: [readContent(element.getAttribute('mente:content'))],
+          body: [
+            readContent(
+              element.getAttribute('novamente:content') ?? element.getAttribute('mente:content'),
+            ),
+          ],
           tags,
           children: readOutlines(element, depth + 1),
           depth,
@@ -226,16 +236,20 @@ export function importTextBackup(
   const notes = makeNotes(outlines, now);
   const rootIds = notes.filter((note) => note.parentId === null).map((note) => note.id);
   const roots = new Set(rootIds);
-  return createBackup({
-    notes,
-    links: [],
-    settings: {
-      ...settings,
-      lastCategoryId: settings.lastCategoryId && roots.has(settings.lastCategoryId)
-        ? settings.lastCategoryId
-        : rootIds[0] ?? null,
+  return createBackup(
+    {
+      notes,
+      links: [],
+      settings: {
+        ...settings,
+        lastCategoryId:
+          settings.lastCategoryId && roots.has(settings.lastCategoryId)
+            ? settings.lastCategoryId
+            : (rootIds[0] ?? null),
+      },
+      views: [],
+      meta: [{ key: 'exampleRootIds', value: rootIds }],
     },
-    views: [],
-    meta: [{ key: 'exampleRootIds', value: rootIds }],
-  }, now);
+    now,
+  );
 }

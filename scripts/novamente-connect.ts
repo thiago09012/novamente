@@ -45,9 +45,9 @@ function parseArgs(argv: string[]): Args {
   return {
     ide: stringFlag('ide'),
     scope: stringFlag('scope'),
-    vault: stringFlag('vault') ?? 'mente-vault',
+    vault: stringFlag('vault') ?? 'novamente-vault',
     base: stringFlag('base'),
-    name: stringFlag('name') ?? 'mente',
+    name: stringFlag('name') ?? 'novamente',
     yes: flags.get('yes') === true,
     force: flags.get('force') === true,
     dryRun: flags.get('dry-run') === true,
@@ -136,7 +136,7 @@ async function main(): Promise<void> {
   const repoDir = resolve(process.cwd());
   const host = process.platform as HostPlatform;
   const vaultDir = resolve(args.vault);
-  const basePath = resolve(args.base ?? join(vaultDir, '.mente', 'base.json'));
+  const basePath = resolve(args.base ?? join(vaultDir, '.novamente', 'base.json'));
   requirePreflight(repoDir, vaultDir);
 
   let ide = args.ide;
@@ -194,9 +194,9 @@ async function main(): Promise<void> {
       '-s',
       claudeScope,
       '--env',
-      `MENTE_VAULT_DIR=${vaultDir}`,
+      `NOVAMENTE_VAULT_DIR=${vaultDir}`,
       '--env',
-      `MENTE_BASE_BACKUP=${basePath}`,
+      `NOVAMENTE_BASE_BACKUP=${basePath}`,
       args.name,
       '--',
       nodePath,
