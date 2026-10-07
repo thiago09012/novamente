@@ -38,3 +38,9 @@ Este plano segue as sete fases e critérios de aceite de `prompt-mestre-mente.md
 - ✅ `ai:prepare --root` cria um vault com uma categoria/projeto e seus descendentes; `.mente/base.json` contém somente esse escopo.
 - ✅ `ai:package --root --base` exige um backup completo atual, rejeita mudanças para fora do projeto e gera relatório de alterações/conflitos.
 - ⏳ Próximas melhorias: sincronização automática sem clique, busca semântica opt-in, fila de propostas no app, histórico durável e interface local de ferramentas para agentes.
+
+## Lançamento open-source (fora das 7 fases)
+
+- ⏳ Licença MIT + CI + templates + CONTRIBUTING + conduta + READMEs EN/pt-BR (infra no repo; falta publicar).
+- ⏳ Issues iniciais `good first issue`/`help wanted` e higiene do GitHub (descrição, topics, preview).
+- ⏳ Lançamento BR (TabNews, comunidades dev) e depois global (Reddit, Show HN, diretórios MCP).

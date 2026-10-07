@@ -169,7 +169,7 @@ Testes: `src/domain/markdown.test.ts`, `src/domain/vault.test.ts`,
 ## Documentação
 
 `README.md` (visão geral + fluxo IA) · `docs/AI_PLAYBOOK.md` (handoff detalhado
-para agentes/MCP) · `docs/ARCHITECTURE.md` ·
+para agentes/MCP) · `.github/CONTRIBUTING.md` (guia para contribuidores) · `docs/ARCHITECTURE.md` ·
 `docs/SHORTCUTS.md` · `docs/HANDOFF.md` (ambiente e handoff técnico) ·
 `docs/PLAN.md` (fases/status) · `docs/DECISIONS.md` ·
 `prompt-mestre-mente.md` (especificação-mestre).
